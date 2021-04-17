@@ -6,4 +6,4 @@
 
 
 
-#### SysY $\rightarrow$ Eeyore $\rightarrow$ Tigger $\rightarrow$ RISCV
+#### SysY to Eeyore to Tigger to RISCV.
