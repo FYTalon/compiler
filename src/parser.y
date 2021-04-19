@@ -10,6 +10,8 @@ extern int yylex();
 extern int yyget_lineno();
 extern int yylex_destroy();
 void yyerror(const char *s) { printf("Error:%s\nat line: %d: \n", s, yyget_lineno()); yylex_destroy(); if (!yydebug) exit(1); }
+
+static NRoot* root;
 %}
 
 %union {
@@ -19,11 +21,11 @@ void yyerror(const char *s) { printf("Error:%s\nat line: %d: \n", s, yyget_linen
     NDeclare_statement* declare_statement;
     NDeclare* declare;
     NExpression* expr;
-    NFunctionDefine* fundef;
     NArrayInitVal* array_init_val;
     NArrayIdentifier* array_identifier;
-    NFunctionCallArgList* fundefarglist;
-    NFunctionCallArg* fundefarg;
+    NFunctionDefine* fundef;
+    NFunctionDefineArgList* fundefarglist;
+    NFunctionDefineArg* fundefarg;
     NArgList* arglist;
     NBlock* block;
     NStatement* stmt;
@@ -62,87 +64,161 @@ void yyerror(const char *s) { printf("Error:%s\nat line: %d: \n", s, yyget_linen
 %type <block> Block BlockItems
 %type <stmt> BlockItem Stmt
 %%
-CompUnit: CompUnit Decl
-        | CompUnit FuncDef
-        | Decl
-        | FuncDef
+CompUnit: CompUnit Decl { 
+            $$->context.push_back($2); 
+        }
+        | CompUnit FuncDef { 
+            $$->context.push_back($2); 
+        }
+        | Decl { 
+            root = new NRoot(); 
+            $$ = root; 
+            $$->context.push_back($2); 
+        }
+        | FuncDef { 
+            root = new NRoot(); 
+            $$ = root; 
+            $$->context.push_back($2); 
+        }
         ;
 
-Decl: ConstDecl SEMI
-    | VarDecl SEMI
+Decl: ConstDecl SEMI { $$ = $1; }
+    | VarDecl SEMI { $$ = $1; }
     ;
 
-ConstDecl: CONST BType ConstDef
-         | ConstDecl COMMA ConstDef
-         ;
-
-BType: INT;
-
-ConstDef: ConstDefSingle
-        | ConstDefArray
+ConstDecl: CONST BType ConstDef { 
+            $$ = new NDeclare_statement($2);
+            $$->child.push_back($3);
+        }
+        | ConstDecl COMMA ConstDef{
+            $$->child.push_back($3);
+        }
         ;
 
-ConstDefSingle: IDENT ASSIGN InitVal
-              ;
+BType: INT; { $$ = $1; }
 
-ConstDefArray: DefArrayName ASSIGN InitValArray
-             ;
+ConstDef: ConstDefSingle { $$ = $1; }
+        | ConstDefArray { $$ = $1; }
+        ;
 
-Def: DefSingle
-   | DefArray
+ConstDefSingle: IDENT ASSIGN InitVal {
+                $$ = new NVarDeclare($1, $3);
+            }
+            ;
+
+ConstDefArray: DefArrayName ASSIGN InitValArray {
+                $$ = new NArrayDeclare($1, $3);
+            }
+            ;
+
+Def: DefSingle { $$ = $1; }
+   | DefArray { $$ = $1; }
    ;
 
-DefSingle: IDENT ASSIGN InitVal
-         | IDENT
-         ;
-
-DefArray: DefArrayName ASSIGN InitValArray
-        | DefArrayName
+DefSingle: IDENT ASSIGN InitVal {
+            $$ = NVarDeclare($1, $3);
+        }
+        | IDENT{
+            $$ = NVarDeclare($1);
+        }
         ;
 
-DefArrayName: DefArrayName LSQUARE Exp RSQUARE
-            | IDENT LSQUARE Exp RSQUARE
-            ;
-
-InitVal: AddExp
-       ;
-
-InitValArray: LBRACE InitValArrayInner RBRACE
-            | LBRACE RBRACE
-            ;
-
-InitValArrayInner: InitValArrayInner COMMA InitValArray
-                 | InitValArrayInner COMMA InitVal
-                 | InitValArray
-                 | InitVal
-                 ;
-
-FuncDef: FuncType IDENT LPAREN RPAREN Block
-       | FuncType IDENT LPAREN FuncFParams RPAREN Block
-       ;
-
-FuncType: INT
-        | VOID
+DefArray: DefArrayName ASSIGN InitValArray {
+            $$ = NArrayDeclare($1, $3);
+        }
+        | DefArrayName{
+            $$ = NArrayDeclare($1);
+        }
         ;
 
-FuncFParams: FuncFParams COMMA FuncFParam
-           | FuncFParam
-           ;
+DefArrayName: DefArrayName LSQUARE Exp RSQUARE {
+                $$ = $1;
+                $$->shape.push_back($3);
+            }
+            | IDENT LSQUARE Exp RSQUARE {
+                $$ = NArrayIdentifier($1);
+                $$->shape.push_back($3);
+            }
+            ;
 
-FuncFParam: FuncFParamOne
-          | FuncFParamArray
+InitVal: AddExp { $$ = $1; }
+       ;
+
+InitValArray: LBRACE InitValArrayInner RBRACE {
+                $$ = $2;
+            }
+            | LBRACE RBRACE{
+                $$ = new NArrayInitVal();
+            }
+            ;
+
+InitValArrayInner: InitValArrayInner COMMA InitValArray {
+                    $$ = $1;
+                    $$->value.push_back($3);
+                }
+                | InitValArrayInner COMMA InitVal {
+                    $$ = $1;
+                    $$->value.push_back(new NArrayInitVal(true, $3));
+                }
+                | InitValArray {
+                    $$ = new NArrayInitVal();
+                    $$->value.push_back($1);
+                }
+                | InitVal {
+                    $$ = new NArrayInitVal();
+                    $$->value.push_back(new NArrayInitVal(true, $3));
+                }
+                ;
+
+FuncDef: FuncType IDENT LPAREN RPAREN Block {
+            $$ = new NFunctionDefine($1, $2, new NFunctionCallArgList(), $5);
+        }
+        | FuncType IDENT LPAREN FuncFParams RPAREN Block {
+            $$ = new NFunctionDefine($1, $2, $4, $6);
+        }
+        ;
+
+FuncType: INT { $$ = $1; }
+        | VOID { $$ = $1; }
+        ;
+
+FuncFParams: FuncFParams COMMA FuncFParam {
+                $$ = $1;
+                $$->list.push_back($3);
+            }
+            | FuncFParam{
+                $$ = new NFunctionDefineArgList();
+                $$->ilst.push_back($1);
+            }
+            ;
+
+FuncFParam: FuncFParamOne { $$ = $1; }
+          | FuncFParamArray { $$ = $1; }
           ;
 
-FuncFParamOne: BType IDENT
-             ;
+FuncFParamOne: BType IDENT { $$ = new NFunctionDefineArg($1, $2); }
+            ;
 
-FuncFParamArray: FuncFParamOne LSQUARE RSQUARE
-               | FuncFParamArray LSQUARE Exp RSQUARE
-               ;
+FuncFParamArray: BType IDENT LSQUARE RSQUARE {
+                    $$ = new NFunctionDefineArg($1, 
+                        new NArrayIdentifier($2));
+                    $$->name->shape.push_back(new NNumber(1));
+                }
+                | FuncFParamArray LSQUARE Exp RSQUARE{
+                    $$ = $1;
+                    $$->name->shape.push_back($3);
+                }
+                ;
 
-FuncRParams: FuncRParams COMMA AddExp
-           | AddExp
-           ;
+FuncRParams: FuncRParams COMMA AddExp {
+                $$ = $1;
+                $1->list.push_back($3);
+            }
+            | AddExp {
+                $$ = new NArgList();
+                $$->list.push_back($1);
+            }
+            ;
 
 Block: LBRACE RBRACE
      | LBRACE BlockItems RBRACE
