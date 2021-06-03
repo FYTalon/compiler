@@ -30,8 +30,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_Y_TAB_H_INCLUDED
-# define YY_YY_Y_TAB_H_INCLUDED
+#ifndef YY_YY_MNT_HGFS_LAB_COMPILER_SRC_PARSER_HPP_INCLUDED
+# define YY_YY_MNT_HGFS_LAB_COMPILER_SRC_PARSER_HPP_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -45,91 +45,56 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    INTEGER = 258,
-    IDENTIFIER = 259,
-    IF = 260,
-    ELSE = 261,
-    WHILE = 262,
-    BREAK = 263,
-    CONTINUE = 264,
-    RETURN = 265,
-    CONST = 266,
-    INT = 267,
-    VOID = 268,
-    ASSIGN = 269,
-    EQ = 270,
-    NQ = 271,
-    LT = 272,
-    LQ = 273,
-    GT = 274,
-    GQ = 275,
-    AND = 276,
-    OR = 277,
-    NOT = 278,
-    PLUS = 279,
-    MINUS = 280,
-    MUL = 281,
-    DIV = 282,
-    MOD = 283,
-    LPAREN = 284,
-    RPAREN = 285,
-    LSQUARE = 286,
-    RSQUARE = 287,
-    LBRACE = 288,
-    RBRACE = 289,
-    COMMA = 290,
-    SEMI = 291,
-    LOWER_THAN_ELSE = 292
+    IDENTIFIER = 258,
+    DINTEGER = 259,
+    OINTEGER = 260,
+    HINTEGER = 261,
+    IF = 262,
+    ELSE = 263,
+    WHILE = 264,
+    BREAK = 265,
+    CONTINUE = 266,
+    RETURN = 267,
+    CONST = 268,
+    INT = 269,
+    VOID = 270,
+    ASSIGN = 271,
+    EQ = 272,
+    NQ = 273,
+    LT = 274,
+    LQ = 275,
+    GT = 276,
+    GQ = 277,
+    AND = 278,
+    OR = 279,
+    NOT = 280,
+    PLUS = 281,
+    MINUS = 282,
+    MUL = 283,
+    DIV = 284,
+    MOD = 285,
+    LPAREN = 286,
+    RPAREN = 287,
+    LSQUARE = 288,
+    RSQUARE = 289,
+    LBRACE = 290,
+    RBRACE = 291,
+    COMMA = 292,
+    SEMI = 293
   };
 #endif
-/* Tokens.  */
-#define INTEGER 258
-#define IDENTIFIER 259
-#define IF 260
-#define ELSE 261
-#define WHILE 262
-#define BREAK 263
-#define CONTINUE 264
-#define RETURN 265
-#define CONST 266
-#define INT 267
-#define VOID 268
-#define ASSIGN 269
-#define EQ 270
-#define NQ 271
-#define LT 272
-#define LQ 273
-#define GT 274
-#define GQ 275
-#define AND 276
-#define OR 277
-#define NOT 278
-#define PLUS 279
-#define MINUS 280
-#define MUL 281
-#define DIV 282
-#define MOD 283
-#define LPAREN 284
-#define RPAREN 285
-#define LSQUARE 286
-#define RSQUARE 287
-#define LBRACE 288
-#define RBRACE 289
-#define COMMA 290
-#define SEMI 291
-#define LOWER_THAN_ELSE 292
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 17 "parser.y" /* yacc.c:1909  */
+#line 18 "src/parser.y" /* yacc.c:1909  */
 
     int token;
     NIdentifier* ident;
     NRoot* root;
-    NDeclare_statement* declare_statement;
+    NDeclareStatement* declare_statement;
     NDeclare* declare;
     NExpression* expr;
     NArrayInitVal* array_init_val;
@@ -142,9 +107,9 @@ union YYSTYPE
     NStatement* stmt;
 
     string *str;
-    NCondition* cond;
+    NConditionExpression* cond;
 
-#line 148 "y.tab.h" /* yacc.c:1909  */
+#line 113 "/mnt/hgfs/lab/compiler/src/parser.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -157,4 +122,4 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_Y_TAB_H_INCLUDED  */
+#endif /* !YY_YY_MNT_HGFS_LAB_COMPILER_SRC_PARSER_HPP_INCLUDED  */

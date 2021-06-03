@@ -7,26 +7,25 @@
 #include <cstring>
 #include <vector>
 #include "symtab.h"
-#include "y.tab.h"
 
 using namespace std;
 
 extern FILE *Eeyore;
 
-string Declare, Context;
-vector<int>Start, End;
+extern string Context;
+extern vector<int>Start, End;
 
-int max_index[4];
+extern int max_index[4];
 /*
 0 T
 1 t
 2 p
+3 l
 */
 
 class Node{
 public:
-    virtual ~Node();
-    virtual Symbol* generate_ir();
+    virtual Symbol* generate_ir(){}
 };
 
 class NRoot : public Node{
@@ -43,20 +42,54 @@ public:
 
 class NDeclare : public Node{
 public:
-
+    virtual Symbol* generate_ir(){}
 };
 
-class NIdentifier : public Node{
+class NExpression : public Node{
+public:
+    virtual Symbol* generate_ir(){}
+};
+
+
+class NStatement : public NExpression{
+public:
+
+    virtual Symbol* generate_ir(){}
+};
+
+class NBlock : public NStatement{
+public:
+    vector<NStatement*> stmts;
+    bool enter;
+    NBlock(){
+        enter = false;
+    }
+    virtual Symbol* generate_ir(){
+        if(!enter) EnterBlock();
+        for(NStatement* it : stmts)
+            it->generate_ir();
+        if(!enter) ExitBlock();
+        return new Symbol();
+    }
+};
+
+class NIdentifier : public NExpression{
 public:
     string* name;
+    NIdentifier(){};
     NIdentifier(string* _) : name(_) {}
+
+    virtual Symbol* generate_ir(){}
 };
 
 class NArrayIdentifier : public NIdentifier{
 public:
     NIdentifier* name;
     vector<NExpression*> shape;
-    NArrayIdentifier(NIdentifier* _name) : name(_name) {}
+    NArrayIdentifier(NIdentifier* _name){
+        name = _name; 
+    }
+    virtual Symbol* generate_ir(){}
 };
 
 class NArrayInitVal : public NExpression{
@@ -65,6 +98,7 @@ public:
     NExpression* val;
     bool end;
     NArrayInitVal(bool _end = false, NExpression* _val = NULL) : end(_end), val(_val) {}
+    virtual Symbol* generate_ir(){}
 };
 
 class NDeclareStatement : public NStatement{
@@ -90,7 +124,7 @@ public:
         insert(name->name, 0, id = max_index[0]++, 'T');
         fprintf(Eeyore, "var T%d\n", id);
         if(value != NULL){
-            Symbol* tmp = value.generate_ir();
+            Symbol* tmp = value->generate_ir();
             char s[100];
             memset(s, 0, sizeof(s));
             sprintf(s, "T%d = %c%d\n", id, tmp->type, tmp->memloc);
@@ -141,26 +175,15 @@ public:
 
 };
 
-class NFunctionDefine : public NDeclare{
+class NFunctionDefineArg : public NExpression{
 public:
     int type;
     NIdentifier* name;
-    NFunctionDefineArgList* args;
-    NBlock* body;
-    NFunctionDefine(int _type, NIdentifier* _name, NFunctionDefineArgList* _args, NBlock* _body) :
-    type(_type), name(_name), args(_args), body(_body) {}
+    NFunctionDefineArg(int _type, NIdentifier* _name) : 
+    type(_type), name(_name) {}
     virtual Symbol* generate_ir(){
-        insert(name->name, args.size(), type, 'F');
-        fprintf(Eeyore, "f_%s [%d]\n", name->name->c_str(), args.size());
-        Context.clear();
-        body->enter = true;
-        EnterBlock();
-        max_index[2] = 0;
-        args->generate_ir();
-        body->generate_ir();
-        ExitBlock();
-        fprintf(Eeyore, "%s\n", Context.c_str());
-        fprintf(Eeyore, "end f_%s\n", name->name->c_str());
+        int id;
+        insert(name->name, 0, id = max_index[2]++, 'p');
         return new Symbol();
     }
 };
@@ -176,15 +199,26 @@ public:
     }
 };
 
-class NFunctionDefineArg : public NExpression{
+class NFunctionDefine : public NDeclare{
 public:
     int type;
     NIdentifier* name;
-    NFunctionDefineArg(int _type, NIdentifier* _name) : 
-    type(_type), name(_name) {}
+    NFunctionDefineArgList* args;
+    NBlock* body;
+    NFunctionDefine(int _type, NIdentifier* _name, NFunctionDefineArgList* _args, NBlock* _body) :
+    type(_type), name(_name), args(_args), body(_body) {}
     virtual Symbol* generate_ir(){
-        int id;
-        insert(name->name, 0, id = max_index[2]++, 'p');
+        insert(name->name, args->list.size(), type, 'F');
+        fprintf(Eeyore, "f_%s [%d]\n", name->name->c_str(), (int)args->list.size());
+        Context.clear();
+        body->enter = true;
+        EnterBlock();
+        max_index[2] = 0;
+        args->generate_ir();
+        body->generate_ir();
+        ExitBlock();
+        fprintf(Eeyore, "%s\n", Context.c_str());
+        fprintf(Eeyore, "end f_%s\n", name->name->c_str());
         return new Symbol();
     }
 };
@@ -214,33 +248,12 @@ public:
         char s[100];
         memset(s, 0, sizeof(s));
         Symbol* tmp = lookup(name->name);
-        if(tmp->memloc == INT){
+        if(tmp->memloc == 269){
             int id = max_index[1]++;
             sprintf(s, "t%d = call f_%s\n", id, name->name->c_str());
         }
         else sprintf(s, "call f_%s\n", name->name->c_str());
         Context += s;
-    }
-};
-
-class NStatement : public NExpression{
-public:
-
-};
-
-class NBlock : public NStatement{
-public:
-    vector<NStatement*> stmts;
-    bool enter;
-    NBlock(){
-        enter = false;
-    }
-    virtual Symbol* tmp(){
-        if(!enter) EnterBlock();
-        for(NStatement* it : stmts)
-            it->generate_ir();
-        if(!enter) ExitBlock();
-        return new Symbol();
     }
 };
 
@@ -276,6 +289,16 @@ public:
     }
 };
 
+
+class NConditionExpression : public NExpression {
+public:
+    NExpression* val;
+    NConditionExpression(NExpression* _) : val(_) {}
+    virtual Symbol* generate_ir(){
+        return val->generate_ir();
+    }
+};
+
 class NIfElse : public NStatement{
 public:
     NConditionExpression* cond;
@@ -296,7 +319,7 @@ public:
         sprintf(s, "goto l%d\nl%d:\n", end, id);
         Context += s;
         elsestmt->generate_ir();
-        memest(s, 0, sizeof(s));
+        memset(s, 0, sizeof(s));
         sprintf(s, "l%d:\n", end);
         Context += s;
         return new Symbol();
@@ -312,7 +335,7 @@ public:
         int bg = max_index[3]++;
         char s[100];
         memset(s, 0, sizeof(s));
-        sprintf("l%d:\n", bg);
+        sprintf(s, "l%d:\n", bg);
         Context += s;
         Symbol* tmp = cond->generate_ir();
         int end = max_index[3]++;
@@ -323,7 +346,7 @@ public:
         End.push_back(end);
         stmt->generate_ir();
         memset(s, 0, sizeof(s));
-        sprintf("l%d:\n", end);
+        sprintf(s, "l%d:\n", end);
         Context += s;
         Start.pop_back();
         End.pop_back();
@@ -356,7 +379,7 @@ public:
 class NReturn : public NStatement {
 public:
     NExpression* val;
-    NReturnStatement(NExpression* _ = NULL) : val(_) {}
+    NReturn(NExpression* _ = NULL) : val(_) {}
     virtual Symbol* generate_ir(){
         char s[100];
         memset(s, 0, sizeof(s));
@@ -371,24 +394,13 @@ public:
     }
 };
 
-class NExpression : public Node{
-public:
-};
-
 class NNumber : public NExpression{
+public:
     int val;
-    NNumber(const string& v, int type){
+    NNumber(const string& v){
         val = 0;
-        switch(type){
-            case OINTEGER:
-                for(int i = 1; i < v.length(); i++)
-                    val = val * 8 + v[i] - '0';
-                break;
-            case DINTEGER:
-                for(int i = 0; i < v.length(); i++)
-                    val = val * 10 + v[i] - '0';
-                break;
-            case HINTEGER:
+        if(v[0] == '0'){
+            if(v[1] == 'x' || v[1] == 'X'){
                 for(int i = 2; i < v.length(); i++)
                     if(v[i] >= '0' && v[i] <= '9')
                         val = val * 16 + v[i] - '0';
@@ -396,7 +408,21 @@ class NNumber : public NExpression{
                         val = val * 16 + 10 + v[i] - 'a';
                     else 
                         val = val * 16 + 10 + v[i] - 'A';
+            }
+            else {
+                for(int i = 1; i < v.length(); i++)
+                    val = val * 8 + v[i] - '0';
+            }
         }
+        else {
+            for(int i = 0; i < v.length(); i++)
+                val = val * 10 + v[i] - '0';
+        }
+    }
+    NNumber(){
+        val = -1;
+    }
+    virtual Symbol* generate_ir(){
         return new Symbol(0, val, ' ');
     }
 };
@@ -405,144 +431,21 @@ class NUnaryExpression : public NExpression{
 public:
     int op;
     NExpression* val;
-    NUnaryExpression(int _, NUnaryExpression* __) : op(_), val(__) {}
-    virtual Symbol* generate_ir(){
-        Symbol* tmp = val->generate_ir();
-        if(tmp->type == ' '){
-            switch(op){
-                case PLUS:
-                    return tmp;
-                case MINUS:
-                    tmp->memloc = -tmp->memloc;
-                    return tmp;
-                case NOT:
-                    tmp->memloc = !tmp->memloc;
-                    return tmp;
-            }
-        }
-        else {
-            int id = max_index[1]++;
-            fprintf(Eeyore, "var t%d\n", id);
-            char s[100];
-            memset(s, 0, sizeof(s));
-            Symbol* rt = new Symbol(tmp->paranum, tmp->type, tmp->memloc);
-            switch(op){
-                case PLUS:
-                    sprintf(s, "t%d = %c%d\n", id, tmp->type, tmp->memloc);
-                    break;
-                case MINUS:
-                    sprintf(s, "t%d = -%c%d\n", id, tmp->type, tmp->memloc);
-                    rt->memloc = -rt->memloc;
-                    break;
-                case NOT:
-                    sprintf(s, "t%d = !%c%d\n", id, tmp->type, tmp->memloc);
-                    rt->memloc = !rt->memloc;
-            }
-            Context += s;
-            return rt;
-        }
+    NUnaryExpression(int _, NExpression* __){
+        op = _;
+        val = __;
     }
-}
+    virtual Symbol* generate_ir();
+};
 
 class NBinaryExpression : public NExpression{
+public:
     int op;
     NExpression* l;
     NExpression* r;
     NBinaryExpression(NExpression* _, int __, NExpression* ___) : l(_), op(__), r(___) {}
-    virtual Symbol* generate_ir(){
-        Symbol* lhs = l->generate_ir();
-        Symbol* rhs = r->generate_ir();
-        if(lhs->type == rhs->type && lhs->type == ' '){
-            switch(op){
-                case MUL:
-                    return new Symbol(0, lhs->memloc * rhs->memloc, ' ');
-                case DIV:
-                    return new Symbol(0, lhs->memloc / rhs->memloc, ' ');
-                case MOD:
-                    return new Symbol(0, lhs->memloc % rhs->memloc, ' ');
-                case PLUS:
-                    return new Symbol(0, lhs->memloc + rhs->memloc, ' ');
-                case MINUS:
-                    return new Symbol(0, lhs->memloc - rhs->memloc, ' ');
-                case LT:
-                    return new Symbol(0, lhs->memloc < rhs->memloc, ' ');
-                case LQ:
-                    return new Symbol(0, lhs->memloc <= rhs->memloc, ' ');
-                case GT:
-                    return new Symbol(0, lhs->memloc > rhs->memloc, ' ');
-                case GQ:
-                    return new Symbol(0, lhs->memloc >= rhs->memloc, ' ');
-                case EQ:
-                    return new Symbol(0, lhs->memloc == rhs->memloc, ' ');
-                case NQ:
-                    return new Symbol(0, lhs->memloc != rhs->memloc, ' ');
-                case AND:
-                    return new Symbol(0, lhs->memloc && rhs->memloc, ' ');
-                case OR:
-                    return new Symbol(0, lhs->memloc || rhs->memloc, ' ');
-            }
-        }
-        else {
-            int id = max_index[1]++;
-            char s[100];
-            memset(s, 0, sizeof(s));
-            fprintf(Eeyore, "var t%d\n", id);
-            switch(op){
-                case MUL:
-                    sprintf(s, "t%d = %c%d * %c%d\n", id, lhs->type, lhs->memloc, rhs->type, rhs->memloc);
-                    break;
-                case DIV:
-                    sprintf(s, "t%d = %c%d / %c%d\n", id, lhs->type, lhs->memloc, rhs->type, rhs->memloc);
-                    break;
-                case MOD:
-                    sprintf(s, "t%d = %c%d % %c%d\n", id, lhs->type, lhs->memloc, rhs->type, rhs->memloc);
-                    break;
-                case PLUS:
-                    sprintf(s, "t%d = %c%d + %c%d\n", id, lhs->type, lhs->memloc, rhs->type, rhs->memloc);
-                    break;
-                case MINUS:
-                    sprintf(s, "t%d = %c%d - %c%d\n", id, lhs->type, lhs->memloc, rhs->type, rhs->memloc);
-                    break;
-                case LT:
-                    sprintf(s, "t%d = %c%d < %c%d\n", id, lhs->type, lhs->memloc, rhs->type, rhs->memloc);
-                    break;
-                case LQ:
-                    sprintf(s, "t%d = %c%d <= %c%d\n", id, lhs->type, lhs->memloc, rhs->type, rhs->memloc);
-                    break;
-                case GT:
-                    sprintf(s, "t%d = %c%d > %c%d\n", id, lhs->type, lhs->memloc, rhs->type, rhs->memloc);
-                    break;
-                case GQ:
-                    sprintf(s, "t%d = %c%d >= %c%d\n", id, lhs->type, lhs->memloc, rhs->type, rhs->memloc);
-                    break;
-                case EQ:
-                    sprintf(s, "t%d = %c%d == %c%d\n", id, lhs->type, lhs->memloc, rhs->type, rhs->memloc);
-                    break;
-                case NQ:
-                    sprintf(s, "t%d = %c%d != %c%d\n", id, lhs->type, lhs->memloc, rhs->type, rhs->memloc);
-                    break;
-                case AND:
-                    sprintf(s, "t%d = %c%d && %c%d\n", id, lhs->type, lhs->memloc, rhs->type, rhs->memloc);
-                    break;
-                case OR:
-                    sprintf(s, "t%d = %c%d || %c%d\n", id, lhs->type, lhs->memloc, rhs->type, rhs->memloc);
-                    break;
-            }
-            Context += s;
-            return new Symbol(0, id, 't');
-        }
-    }
+    virtual Symbol* generate_ir();
 };
-
-class NConditionExpression : public NExpression {
-public:
-    NExpression* val;
-    NConditionExpression(NExpression* _) : val(_) {}
-    virtual Symbol* generate_ir(){
-        return val->generate_ir();
-    }
-};
-
 
 
 #endif

@@ -4,7 +4,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <algorithm>
 #include <map>
+using namespace std;
 
 class Symbol{
 public:
@@ -28,36 +30,19 @@ public:
         nxt = NULL;
         tab.clear();
     }
-}*head;
+};
 
-void init(){
-    head = NULL;
-}
+extern SymTab* head;
 
-void EnterBlock(){
-    SymTab* blk = new SymTab();
-    blk->pre = head;
-    if(head != NULL) head->nxt = blk;
-    head = blk;
-}
+void init();
 
-void ExitBlock(){
-    head = head->pre;
-    delet(head->nxt);
-}
+void EnterBlock();
 
-void insert(string* name, int paranum, int memloc, char type){
-    head->tab[*name] = new Symbol(paranum, memloc, type);
-}
+void ExitBlock();
 
-Symbol* lookup(string* name){
-    SymTab* now = head;
-    while(now != NULL && now->tab.count(*name) == 0)
-        now = now->pre;
-    Symbol* ret = new Symbol();
-    if(now != NULL) ret = now->tab[*name];
-    return ret;
-}
+void insert(string* name, int paranum, int memloc, char type);
+
+Symbol* lookup(string* name);
 
 #endif
 

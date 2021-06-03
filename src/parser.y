@@ -1,7 +1,9 @@
 %{
 #include "node.h"
+#include "ir.h"
 #include <cstdio>
 #include <cstdlib>
+#include "parser.hpp"
 using namespace std;
 
 extern int yydebug;
@@ -11,14 +13,13 @@ extern int yyget_lineno();
 extern int yylex_destroy();
 void yyerror(const char *s) { printf("Error:%s\nat line: %d: \n", s, yyget_lineno()); yylex_destroy(); if (!yydebug) exit(1); }
 
-static NRoot* root;
 %}
 
 %union {
     int token;
     NIdentifier* ident;
     NRoot* root;
-    NDeclare_statement* declare_statement;
+    NDeclareStatement* declare_statement;
     NDeclare* declare;
     NExpression* expr;
     NArrayInitVal* array_init_val;
@@ -31,17 +32,17 @@ static NRoot* root;
     NStatement* stmt;
 
     string *str;
-    NCondition* cond;
+    NConditionExpression* cond;
 }
 
-%token <str> INTEGER IDENTIFIER
+%token <str> IDENTIFIER DINTEGER OINTEGER HINTEGER
 %token <token> IF ELSE WHILE BREAK CONTINUE RETURN 
 %token <token> CONST INT VOID
 %token <token> ASSIGN EQ NQ LT LQ GT GQ AND OR NOT PLUS MINUS MUL DIV MOD
 %token <token> LPAREN RPAREN LSQUARE RSQUARE LBRACE RBRACE COMMA SEMI
 
 %type <root> CompUnit
-
+%type <str> Integer
 %type <declare_statement> Decl ConstDecl VarDecl
 %type <declare> ConstDef ConstDefSingle ConstDefArray Def DefSingle DefArray
 
@@ -127,18 +128,18 @@ Def: DefSingle { $$ = $1; }
    ;
 
 DefSingle: IDENT ASSIGN InitVal {
-            $$ = NVarDeclare($1, $3);
+            $$ = new NVarDeclare($1, $3);
         }
         | IDENT{
-            $$ = NVarDeclare($1);
+            $$ = new NVarDeclare($1);
         }
         ;
 
 DefArray: DefArrayName ASSIGN InitValArray {
-            $$ = NArrayDeclare($1, $3);
+            $$ = new NArrayDeclare($1, $3);
         }
         | DefArrayName{
-            $$ = NArrayDeclare($1);
+            $$ = new NArrayDeclare($1);
         }
         ;
 
@@ -147,7 +148,7 @@ DefArrayName: DefArrayName LSQUARE Exp RSQUARE {
                 $$->shape.push_back($3);
             }
             | IDENT LSQUARE Exp RSQUARE {
-                $$ = NArrayIdentifier($1);
+                $$ = new NArrayIdentifier($1);
                 $$->shape.push_back($3);
             }
             ;
@@ -159,7 +160,7 @@ InitValArray: LBRACE InitValArrayInner RBRACE {
                 $$ = $2;
             }
             | LBRACE RBRACE{
-                $$ = new NArrayInitVal();
+                $$ = new NArrayInitVal(true);
             }
             ;
 
@@ -182,13 +183,13 @@ InitValArrayInner: InitValArrayInner COMMA InitValArray {
                 ;
 
 FuncDef : BType IDENT LPAREN RPAREN Block {
-            $$ = new NFunctionDefine($1, $2, new NFunctionCallArgList(), $5);
+            $$ = new NFunctionDefine($1, $2, new NFunctionDefineArgList(), $5);
         }
         | BType IDENT LPAREN FuncFParams RPAREN Block {
             $$ = new NFunctionDefine($1, $2, $4, $6);
         }
         | VOID IDENT LPAREN RPAREN Block {
-            $$ = new NFunctionDefine($1, $2, new NFunctionCallArgList(), $5);
+            $$ = new NFunctionDefine($1, $2, new NFunctionDefineArgList(), $5);
         }
         | VOID IDENT LPAREN FuncFParams RPAREN Block {
             $$ = new NFunctionDefine($1, $2, $4, $6);
@@ -201,7 +202,7 @@ FuncFParams: FuncFParams COMMA FuncFParam {
             }
             | FuncFParam{
                 $$ = new NFunctionDefineArgList();
-                $$->ilst.push_back($1);
+                $$->list.push_back($1);
             }
             ;
 
@@ -215,11 +216,11 @@ FuncFParamOne: BType IDENT { $$ = new NFunctionDefineArg($1, $2); }
 FuncFParamArray: BType IDENT LSQUARE RSQUARE {
                     $$ = new NFunctionDefineArg($1, 
                         new NArrayIdentifier($2));
-                    $$->name->shape.push_back(new NNumber(1));
+                    ((NArrayIdentifier*)$$->name)->shape.push_back(new NNumber());
                 }
                 | FuncFParamArray LSQUARE Exp RSQUARE{
                     $$ = $1;
-                    $$->name->shape.push_back($3);
+                    ((NArrayIdentifier*)$$->name)->shape.push_back($3);
                 }
                 ;
 
@@ -306,8 +307,13 @@ PrimaryExp: LPAREN Exp RPAREN {
         }
         ;
 
-Number: INTEGER { $$ = new NNumber(*$1); }
+Number: Integer { $$ = new NNumber(*$1); }
       ;
+
+Integer : DINTEGER
+        | OINTEGER 
+        | HINTEGER 
+        ;
 
 UnaryOp: PlusOp
        | NOT

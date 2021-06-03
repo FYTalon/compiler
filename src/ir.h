@@ -1,8 +1,12 @@
 #ifndef _IR_H_
 #define _IR_H_
 #include "node.h"
+#include "parser.hpp"
 
-#include "symtab.h"
+extern NRoot* root;
+
+void generate();
+
+#endif
 
 
-void generate(NRoot* root);

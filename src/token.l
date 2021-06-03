@@ -1,11 +1,12 @@
 %{
 #include <string>
-#include "y.tab.h"
+#include "node.h"
+#include "parser.hpp"
 using namespace std;
 
-#define SAVE(t)     yylval.str = new string(yytext, yyleng)
+#define SAVE       yylval.str = new string(yytext, yyleng)
 #define TOKEN(t)   (yylval.token = t)
-#define SKIP for(auto i : string(yytext_ptr)) { if(i == '\n) yylineno++; }
+#define SKIP for(auto i : string(yytext_ptr)) { if(i == '\n') yylineno++; }
 %}
 
 %option noyywrap
@@ -39,10 +40,11 @@ using namespace std;
 "int"                               return TOKEN(INT);
 "void"                              return TOKEN(VOID);
 
-[a-zA-Z_][a-zA-Z_0-9]               SAVE; return IDENTIFIER;
-[0-9]+                              SAVE; return INTEGER;
-"0x"[0-9A-Fa-f]+                    SAVE; return INTEGER;
-"0X"[0-9A-Fa-f]+                    SAVE; return INTEGER;
+[a-zA-Z_][a-zA-Z_0-9]*              SAVE; return IDENTIFIER;
+[1-9][0-9]*                         SAVE; return DINTEGER;
+"0"[0-7]*                           SAVE; return OINTEGER;
+"0x"[0-9A-Fa-f]+                    SAVE; return HINTEGER;
+"0X"[0-9A-Fa-f]+                    SAVE; return HINTEGER;
 
 "="                                 return TOKEN(ASSIGN);
 "=="                                return TOKEN(EQ);
