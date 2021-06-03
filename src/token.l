@@ -1,8 +1,9 @@
 %{
 #include <string>
+#include "y.tab.h"
 using namespace std;
 
-#define SAVE(t)     yylval.string = new string(yytext, yyleng)
+#define SAVE(t)     yylval.str = new string(yytext, yyleng)
 #define TOKEN(t)   (yylval.token = t)
 #define SKIP for(auto i : string(yytext_ptr)) { if(i == '\n) yylineno++; }
 %}
@@ -69,3 +70,4 @@ using namespace std;
 ";"                                 return TOKEN(SEMI);
 
 .                                   printf("UNKNOW TOKEN!\n%s\n", yytext); yyterminate();
+%%

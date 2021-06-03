@@ -30,15 +30,15 @@ static NRoot* root;
     NBlock* block;
     NStatement* stmt;
 
+    string *str;
     NCondition* cond;
 }
 
-%type <string> INTEGER IDENTIFIER
-%type <token> IF ELSE WHILE BREAK CONTINUE RETURN 
-%type <token> CONST INT VOID
-%type <token> FuncType
-%type <token> ASSIGN EQ NQ LT LQ GT GQ AND OR NOT PLUS MINUS MUL DIV MOD
-%type <token> LPAREN RPAREN LSQUARE RSQUARE LBRACE RBRACE COMMA SEMI
+%token <str> INTEGER IDENTIFIER
+%token <token> IF ELSE WHILE BREAK CONTINUE RETURN 
+%token <token> CONST INT VOID
+%token <token> ASSIGN EQ NQ LT LQ GT GQ AND OR NOT PLUS MINUS MUL DIV MOD
+%token <token> LPAREN RPAREN LSQUARE RSQUARE LBRACE RBRACE COMMA SEMI
 
 %type <root> CompUnit
 
@@ -51,8 +51,8 @@ static NRoot* root;
 %type <array_identifier> DefArrayName ArrayItem
 %type <array_init_val> InitValArray InitValArrayInner
 
-%type <token> UnaryOp MulOp AddOp RelOp EqOp
-%type <expr> InitVal Exp Number PrimaryExp UnaryExp MulExp AddExp RelExp EqExp LOrExp LAndExp
+%type <token> UnaryOp MulOp PlusOp RelOp EqOp
+%type <expr> InitVal Exp Number PrimaryExp UnaryExp MulExp AddExp RelExp EqExp LOrExp LAndExp FunctionCall
 %type <cond> Cond
 
 %type <fundef> FuncDef
@@ -62,7 +62,7 @@ static NRoot* root;
 %type <arglist> FuncRParams
 
 %type <block> Block BlockItems
-%type <stmt> BlockItem Stmt
+%type <stmt> BlockItem Stmt AssignStmt IfStmt WhileStmt BreakStmt ContinueStmt ReturnStmt
 %%
 CompUnit: CompUnit Decl { 
             $$->context.push_back($2); 
@@ -73,12 +73,12 @@ CompUnit: CompUnit Decl {
         | Decl { 
             root = new NRoot(); 
             $$ = root; 
-            $$->context.push_back($2); 
+            $$->context.push_back($1); 
         }
         | FuncDef { 
             root = new NRoot(); 
             $$ = root; 
-            $$->context.push_back($2); 
+            $$->context.push_back($1); 
         }
         ;
 
@@ -86,16 +86,27 @@ Decl: ConstDecl SEMI { $$ = $1; }
     | VarDecl SEMI { $$ = $1; }
     ;
 
+VarDecl : BType Def {
+            $$ = new NDeclareStatement($1);
+            $$->child.push_back($2);
+        }
+        | VarDecl COMMA Def {
+            $$ = $1;
+            $$->child.push_back($3);
+        }
+
 ConstDecl: CONST BType ConstDef { 
-            $$ = new NDeclare_statement($2);
+            $$ = new NDeclareStatement($2);
             $$->child.push_back($3);
         }
         | ConstDecl COMMA ConstDef{
+            $$ = $1;
             $$->child.push_back($3);
         }
         ;
 
-BType: INT; { $$ = $1; }
+BType: INT { $$ = $1; }
+        ; 
 
 ConstDef: ConstDefSingle { $$ = $1; }
         | ConstDefArray { $$ = $1; }
@@ -166,20 +177,22 @@ InitValArrayInner: InitValArrayInner COMMA InitValArray {
                 }
                 | InitVal {
                     $$ = new NArrayInitVal();
-                    $$->value.push_back(new NArrayInitVal(true, $3));
+                    $$->value.push_back(new NArrayInitVal(true, $1));
                 }
                 ;
 
-FuncDef: FuncType IDENT LPAREN RPAREN Block {
+FuncDef : BType IDENT LPAREN RPAREN Block {
             $$ = new NFunctionDefine($1, $2, new NFunctionCallArgList(), $5);
         }
-        | FuncType IDENT LPAREN FuncFParams RPAREN Block {
+        | BType IDENT LPAREN FuncFParams RPAREN Block {
             $$ = new NFunctionDefine($1, $2, $4, $6);
         }
-        ;
-
-FuncType: INT { $$ = $1; }
-        | VOID { $$ = $1; }
+        | VOID IDENT LPAREN RPAREN Block {
+            $$ = new NFunctionDefine($1, $2, new NFunctionCallArgList(), $5);
+        }
+        | VOID IDENT LPAREN FuncFParams RPAREN Block {
+            $$ = new NFunctionDefine($1, $2, $4, $6);
+        }
         ;
 
 FuncFParams: FuncFParams COMMA FuncFParam {
@@ -220,56 +233,80 @@ FuncRParams: FuncRParams COMMA AddExp {
             }
             ;
 
-Block: LBRACE RBRACE
-     | LBRACE BlockItems RBRACE
+Block: LBRACE RBRACE { $$ = new NBlock(); }
+     | LBRACE BlockItems RBRACE { $$ = $2; }
      ;
 
-BlockItems: BlockItem
-          | BlockItems BlockItem
+BlockItems: BlockItem { $$ = new NBlock(); $$->stmts.push_back($1); }
+          | BlockItems BlockItem { $$ = $1; $$->stmts.push_back($2); }
           ;
 
-BlockItem: Decl
-         | stmt
+BlockItem: Decl { $$ = $1; }
+         | Stmt { $$ = $1; }
          ;
 
-Stmt: LVal ASSIGN Exp SEMI
-    | Exp SEMI
-    | SEMI
-    | Block
-    | IF LPAREN Cond RPAREN Stmt SEMI
-    | IF LPAREN Cond RPAREN Stmt ELSE Stmt SEMI
-    | WHILE LPAREN Cond RPAREN Stmt 
-    | BREAK SEMI
-    | CONTINUE SEMI
-    | RETURN SEMI
-    | RETURN Exp SEMI
+Stmt: AssignStmt { $$ = $1; }
+    | Exp SEMI { $$ = new NEval($1); }
+    | SEMI { $$ = new NVoid(); }
+    | Block { $$ = $1; }
+    | IfStmt { $$ = $1; }
+    | WhileStmt { $$ = $1; }
+    | BreakStmt { $$ = $1; }
+    | ContinueStmt { $$ = $1; }
+    | ReturnStmt { $$ = $1; }
     ;
 
-Exp: AddExp
-   | CommaExpr
-   ;
+AssignStmt: LVal ASSIGN Exp SEMI { $$ = new NAssignment($1, $3); }
 
-CommaExpr: AddExp COMMA AddExp
-         | CommaExpr COMMA AddExp
-         ;
+IfStmt :  IF LPAREN Cond RPAREN Stmt SEMI {
+            $$ = new NIfElse($3, $5, new NVoid());
+        }
+        | IF LPAREN Cond RPAREN Stmt ELSE Stmt SEMI{
+            $$ = new NIfElse($3, $5, $7);
+        }
 
-Cond: LOrExp
+WhileStmt : WHILE LPAREN Cond RPAREN Stmt {
+                $$ = new NWhile($3, $5);
+            }
+
+BreakStmt : BREAK SEMI { $$ = new NBreak(); }
+ContinueStmt : CONTINUE SEMI { $$ = new NContinue(); }
+
+ReturnStmt :  RETURN SEMI { $$ = new NReturn(); }
+            | RETURN Exp SEMI { $$ = new NReturn($2); }
+
+Exp : AddExp { $$ = $1; }
     ;
 
-ArrayItem: LVal LSQUARE Exp RSQUARE
-         | ArrayItem LSQUARE Exp RSQUARE
-         ;
-
-LVal: IDENT
-    | ArrayItem
+Cond: LOrExp { $$ = new NConditionExpression($1); }
     ;
 
-PrimaryExp: LPAREN Exp RPAREN
-          | LVal
-          | Number
-          ;
+ArrayItem: LVal LSQUARE Exp RSQUARE { 
+            $$ = new NArrayIdentifier($1); 
+            $$->shape.push_back($3);
+        }
+        | ArrayItem LSQUARE Exp RSQUARE {
+            $$ = $1;
+            $$->shape.push_back($3);
+        }
+        ;
 
-Number: INTEGER
+LVal: IDENT { $$ = $1; }
+    | ArrayItem { $$ = $1; }
+    ;
+
+PrimaryExp: LPAREN Exp RPAREN {
+            $$ = $2;
+        }
+        | LVal {
+            $$ = $1;
+        }
+        | Number {
+            $$ = $1;
+        }
+        ;
+
+Number: INTEGER { $$ = new NNumber(*$1); }
       ;
 
 UnaryOp: PlusOp
@@ -295,35 +332,43 @@ EqOp: EQ
     | NQ
     ;
 
-UnaryExp: PrimaryExp
-        | IDENT LPAREN RPAREN
-        | IDENT LPAREN FuncRParams RPAREN
-        | UnaryOp UnaryExp
+UnaryExp: PrimaryExp { $$ = $1; }
+        | UnaryOp UnaryExp { $$ = new NUnaryExpression($1, $2); }
+        | FunctionCall { $$ = $1; }
         ;
 
-MulExp: UnaryExp
-      | MulExp MulOp UnaryExp
+FunctionCall: IDENT LPAREN RPAREN {
+                $$ = new NFunctionCall($1, new NArgList());
+            }
+            | IDENT LPAREN FuncRParams RPAREN {
+                $$ = new NFunctionCall($1, $3);
+            }
+        
+
+MulExp: UnaryExp { $$ = $1; }
+      | MulExp MulOp UnaryExp { $$ = new NBinaryExpression($1, $2, $3); }
       ;
 
-AddExp: MulExp
-      | AddExp PlusOp MulExp
+AddExp: MulExp { $$ = $1; }
+      | AddExp PlusOp MulExp { $$ = new NBinaryExpression($1, $2, $3); }
       ;
 
-RelOp: AddExp
-     | RelExp RelOp AddExp
+RelExp: AddExp { $$ = $1; }
+     | RelExp RelOp AddExp { $$ = new NBinaryExpression($1, $2, $3); }
      ;
 
-EqExp: RelExp
-     | EqExp EqOp RelExp
+EqExp: RelExp { $$ = $1; }
+     | EqExp EqOp RelExp { $$ = new NBinaryExpression($1, $2, $3); }
      ;
 
-LAndExp: EqExp
-       | LAndExp AND EqExp
+LAndExp: EqExp { $$ = $1; }
+       | LAndExp AND EqExp { $$ = new NBinaryExpression($1, $2, $3); }
        ;
 
-LOrExp: LAndExp
-      | LOrExp OR LAndExp
+LOrExp: LAndExp { $$ = $1; }
+      | LOrExp OR LAndExp { $$ = new NBinaryExpression($1, $2, $3); }
       ;
 
+IDENT: IDENTIFIER { $$ = new NIdentifier($1); }
 %%
 
