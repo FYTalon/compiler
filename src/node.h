@@ -25,7 +25,7 @@ extern int max_index[4];
 
 class Node{
 public:
-    virtual Symbol* generate_ir(){}
+    virtual Symbol* generate_ir(){ return new Symbol(); }
 };
 
 class NRoot : public Node{
@@ -59,19 +59,19 @@ public:
 
 class NDeclare : public Node{
 public:
-    virtual Symbol* generate_ir(){}
+    virtual Symbol* generate_ir(){ return new Symbol(); }
 };
 
 class NExpression : public Node{
 public:
-    virtual Symbol* generate_ir(){}
+    virtual Symbol* generate_ir(){ return new Symbol(); }
 };
 
 
 class NStatement : public NExpression{
 public:
 
-    virtual Symbol* generate_ir(){}
+    virtual Symbol* generate_ir(){ return new Symbol(); }
 };
 
 class NBlock : public NStatement{
@@ -178,7 +178,7 @@ public:
     NExpression* val;
     bool end;
     NArrayInitVal(bool _end = false, NExpression* _val = NULL) : end(_end), val(_val) {}
-    virtual Symbol* generate_ir(){}
+    virtual Symbol* generate_ir(){ return new Symbol(); }
 };
 
 class NDeclareStatement : public NStatement{
@@ -286,7 +286,7 @@ public:
 
 class NFunctionDefineArg : public NExpression{
 public:
-    virtual Symbol* generate_ir(){}
+    virtual Symbol* generate_ir(){ return new Symbol(); }
 };
 
 class NFunctionDefineArgArray : public NFunctionDefineArg{
