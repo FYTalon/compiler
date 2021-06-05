@@ -1,3 +1,0 @@
-/mnt/hgfs/lab/compiler/build/CMakeFiles/rebuild_cache.dir
-/mnt/hgfs/lab/compiler/build/CMakeFiles/Compile.dir
-/mnt/hgfs/lab/compiler/build/CMakeFiles/edit_cache.dir
