@@ -136,20 +136,19 @@ Symbol* NUnaryExpression::generate_ir(){
             fprintf(Eeyore, "var t%d\n", id);
             char s[100];
             memset(s, 0, sizeof(s));
-            Symbol* rt = new Symbol(tmp->paranum, tmp->type, tmp->memloc);
             switch(op){
                 case PLUS:
                     sprintf(s, "t%d = %c%d\n", id, tmp->type, tmp->memloc);
                     break;
                 case MINUS:
                     sprintf(s, "t%d = -%c%d\n", id, tmp->type, tmp->memloc);
-                    rt->memloc = -rt->memloc;
+                    //rt->memloc = -rt->memloc;
                     break;
                 case NOT:
                     sprintf(s, "t%d = !%c%d\n", id, tmp->type, tmp->memloc);
-                    rt->memloc = !rt->memloc;
+                    //rt->memloc = !rt->memloc;
             }
             Context += s;
-            return rt;
+            return tmp;
         }
     }
