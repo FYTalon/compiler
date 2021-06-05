@@ -6,5 +6,5 @@ CXX_FLAGS =
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/mnt/hgfs/lab/compiler/src 
+CXX_INCLUDES = -I/mnt/hgfs/lab/compiler/src -I/mnt/hgfs/lab/compiler/lib 
 

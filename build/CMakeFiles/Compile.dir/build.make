@@ -57,16 +57,16 @@ include CMakeFiles/Compile.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/Compile.dir/flags.make
 
-../src/parser.cpp: ../src/parser.y
+../lib/parser.cpp: ../src/parser.y
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/mnt/hgfs/lab/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "[BISON][Parser] Building parser with bison 3.0.4"
-	cd /mnt/hgfs/lab/compiler && /usr/bin/bison -d -o /mnt/hgfs/lab/compiler/src/parser.cpp src/parser.y
+	cd /mnt/hgfs/lab/compiler && /usr/bin/bison -d -o /mnt/hgfs/lab/compiler/lib/parser.cpp src/parser.y
 
-../src/parser.hpp: ../src/parser.cpp
-	@$(CMAKE_COMMAND) -E touch_nocreate ../src/parser.hpp
+../lib/parser.hpp: ../lib/parser.cpp
+	@$(CMAKE_COMMAND) -E touch_nocreate ../lib/parser.hpp
 
-../src/token.cpp: ../src/token.l
+../lib/token.cpp: ../src/token.l
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/mnt/hgfs/lab/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "[FLEX][Scanner] Building scanner with flex 2.6.4"
-	cd /mnt/hgfs/lab/compiler && /usr/bin/flex -o/mnt/hgfs/lab/compiler/src/token.cpp src/token.l
+	cd /mnt/hgfs/lab/compiler && /usr/bin/flex -o/mnt/hgfs/lab/compiler/lib/token.cpp src/token.l
 
 CMakeFiles/Compile.dir/src/ir.cpp.o: CMakeFiles/Compile.dir/flags.make
 CMakeFiles/Compile.dir/src/ir.cpp.o: ../src/ir.cpp
@@ -94,22 +94,9 @@ CMakeFiles/Compile.dir/src/node.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Compile.dir/src/node.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/hgfs/lab/compiler/src/node.cpp -o CMakeFiles/Compile.dir/src/node.cpp.s
 
-CMakeFiles/Compile.dir/src/parser.cpp.o: CMakeFiles/Compile.dir/flags.make
-CMakeFiles/Compile.dir/src/parser.cpp.o: ../src/parser.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/lab/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/Compile.dir/src/parser.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Compile.dir/src/parser.cpp.o -c /mnt/hgfs/lab/compiler/src/parser.cpp
-
-CMakeFiles/Compile.dir/src/parser.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Compile.dir/src/parser.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/hgfs/lab/compiler/src/parser.cpp > CMakeFiles/Compile.dir/src/parser.cpp.i
-
-CMakeFiles/Compile.dir/src/parser.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Compile.dir/src/parser.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/hgfs/lab/compiler/src/parser.cpp -o CMakeFiles/Compile.dir/src/parser.cpp.s
-
 CMakeFiles/Compile.dir/src/symtab.cpp.o: CMakeFiles/Compile.dir/flags.make
 CMakeFiles/Compile.dir/src/symtab.cpp.o: ../src/symtab.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/lab/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/Compile.dir/src/symtab.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/lab/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/Compile.dir/src/symtab.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Compile.dir/src/symtab.cpp.o -c /mnt/hgfs/lab/compiler/src/symtab.cpp
 
 CMakeFiles/Compile.dir/src/symtab.cpp.i: cmake_force
@@ -120,36 +107,49 @@ CMakeFiles/Compile.dir/src/symtab.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Compile.dir/src/symtab.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/hgfs/lab/compiler/src/symtab.cpp -o CMakeFiles/Compile.dir/src/symtab.cpp.s
 
-CMakeFiles/Compile.dir/src/token.cpp.o: CMakeFiles/Compile.dir/flags.make
-CMakeFiles/Compile.dir/src/token.cpp.o: ../src/token.cpp
-CMakeFiles/Compile.dir/src/token.cpp.o: ../src/parser.hpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/lab/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/Compile.dir/src/token.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Compile.dir/src/token.cpp.o -c /mnt/hgfs/lab/compiler/src/token.cpp
+CMakeFiles/Compile.dir/lib/parser.cpp.o: CMakeFiles/Compile.dir/flags.make
+CMakeFiles/Compile.dir/lib/parser.cpp.o: ../lib/parser.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/lab/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/Compile.dir/lib/parser.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Compile.dir/lib/parser.cpp.o -c /mnt/hgfs/lab/compiler/lib/parser.cpp
 
-CMakeFiles/Compile.dir/src/token.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Compile.dir/src/token.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/hgfs/lab/compiler/src/token.cpp > CMakeFiles/Compile.dir/src/token.cpp.i
+CMakeFiles/Compile.dir/lib/parser.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Compile.dir/lib/parser.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/hgfs/lab/compiler/lib/parser.cpp > CMakeFiles/Compile.dir/lib/parser.cpp.i
 
-CMakeFiles/Compile.dir/src/token.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Compile.dir/src/token.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/hgfs/lab/compiler/src/token.cpp -o CMakeFiles/Compile.dir/src/token.cpp.s
+CMakeFiles/Compile.dir/lib/parser.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Compile.dir/lib/parser.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/hgfs/lab/compiler/lib/parser.cpp -o CMakeFiles/Compile.dir/lib/parser.cpp.s
+
+CMakeFiles/Compile.dir/lib/token.cpp.o: CMakeFiles/Compile.dir/flags.make
+CMakeFiles/Compile.dir/lib/token.cpp.o: ../lib/token.cpp
+CMakeFiles/Compile.dir/lib/token.cpp.o: ../lib/parser.hpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/hgfs/lab/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/Compile.dir/lib/token.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Compile.dir/lib/token.cpp.o -c /mnt/hgfs/lab/compiler/lib/token.cpp
+
+CMakeFiles/Compile.dir/lib/token.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Compile.dir/lib/token.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/hgfs/lab/compiler/lib/token.cpp > CMakeFiles/Compile.dir/lib/token.cpp.i
+
+CMakeFiles/Compile.dir/lib/token.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Compile.dir/lib/token.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/hgfs/lab/compiler/lib/token.cpp -o CMakeFiles/Compile.dir/lib/token.cpp.s
 
 # Object files for target Compile
 Compile_OBJECTS = \
 "CMakeFiles/Compile.dir/src/ir.cpp.o" \
 "CMakeFiles/Compile.dir/src/node.cpp.o" \
-"CMakeFiles/Compile.dir/src/parser.cpp.o" \
 "CMakeFiles/Compile.dir/src/symtab.cpp.o" \
-"CMakeFiles/Compile.dir/src/token.cpp.o"
+"CMakeFiles/Compile.dir/lib/parser.cpp.o" \
+"CMakeFiles/Compile.dir/lib/token.cpp.o"
 
 # External object files for target Compile
 Compile_EXTERNAL_OBJECTS =
 
 Compile: CMakeFiles/Compile.dir/src/ir.cpp.o
 Compile: CMakeFiles/Compile.dir/src/node.cpp.o
-Compile: CMakeFiles/Compile.dir/src/parser.cpp.o
 Compile: CMakeFiles/Compile.dir/src/symtab.cpp.o
-Compile: CMakeFiles/Compile.dir/src/token.cpp.o
+Compile: CMakeFiles/Compile.dir/lib/parser.cpp.o
+Compile: CMakeFiles/Compile.dir/lib/token.cpp.o
 Compile: CMakeFiles/Compile.dir/build.make
 Compile: CMakeFiles/Compile.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/mnt/hgfs/lab/compiler/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable Compile"
@@ -164,9 +164,9 @@ CMakeFiles/Compile.dir/clean:
 	$(CMAKE_COMMAND) -P CMakeFiles/Compile.dir/cmake_clean.cmake
 .PHONY : CMakeFiles/Compile.dir/clean
 
-CMakeFiles/Compile.dir/depend: ../src/parser.cpp
-CMakeFiles/Compile.dir/depend: ../src/parser.hpp
-CMakeFiles/Compile.dir/depend: ../src/token.cpp
+CMakeFiles/Compile.dir/depend: ../lib/parser.cpp
+CMakeFiles/Compile.dir/depend: ../lib/parser.hpp
+CMakeFiles/Compile.dir/depend: ../lib/token.cpp
 	cd /mnt/hgfs/lab/compiler/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /mnt/hgfs/lab/compiler /mnt/hgfs/lab/compiler /mnt/hgfs/lab/compiler/build /mnt/hgfs/lab/compiler/build /mnt/hgfs/lab/compiler/build/CMakeFiles/Compile.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/Compile.dir/depend
 

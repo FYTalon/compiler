@@ -1,3 +1,3 @@
 # Hashes of file build rules.
-ba00abdbcb626609e72dbb2500a2f57c ../src/parser.cpp
-a3ddcc1a90bfe0953179d161d6b477ac ../src/token.cpp
+d4518c57213903e9a2467ac00a91d67f ../lib/parser.cpp
+536979d17724b01bb73ba26d766b308e ../lib/token.cpp

@@ -123,6 +123,60 @@ Compile/fast:
 	$(MAKE) -f CMakeFiles/Compile.dir/build.make CMakeFiles/Compile.dir/build
 .PHONY : Compile/fast
 
+lib/parser.o: lib/parser.cpp.o
+
+.PHONY : lib/parser.o
+
+# target to build an object file
+lib/parser.cpp.o:
+	$(MAKE) -f CMakeFiles/Compile.dir/build.make CMakeFiles/Compile.dir/lib/parser.cpp.o
+.PHONY : lib/parser.cpp.o
+
+lib/parser.i: lib/parser.cpp.i
+
+.PHONY : lib/parser.i
+
+# target to preprocess a source file
+lib/parser.cpp.i:
+	$(MAKE) -f CMakeFiles/Compile.dir/build.make CMakeFiles/Compile.dir/lib/parser.cpp.i
+.PHONY : lib/parser.cpp.i
+
+lib/parser.s: lib/parser.cpp.s
+
+.PHONY : lib/parser.s
+
+# target to generate assembly for a file
+lib/parser.cpp.s:
+	$(MAKE) -f CMakeFiles/Compile.dir/build.make CMakeFiles/Compile.dir/lib/parser.cpp.s
+.PHONY : lib/parser.cpp.s
+
+lib/token.o: lib/token.cpp.o
+
+.PHONY : lib/token.o
+
+# target to build an object file
+lib/token.cpp.o:
+	$(MAKE) -f CMakeFiles/Compile.dir/build.make CMakeFiles/Compile.dir/lib/token.cpp.o
+.PHONY : lib/token.cpp.o
+
+lib/token.i: lib/token.cpp.i
+
+.PHONY : lib/token.i
+
+# target to preprocess a source file
+lib/token.cpp.i:
+	$(MAKE) -f CMakeFiles/Compile.dir/build.make CMakeFiles/Compile.dir/lib/token.cpp.i
+.PHONY : lib/token.cpp.i
+
+lib/token.s: lib/token.cpp.s
+
+.PHONY : lib/token.s
+
+# target to generate assembly for a file
+lib/token.cpp.s:
+	$(MAKE) -f CMakeFiles/Compile.dir/build.make CMakeFiles/Compile.dir/lib/token.cpp.s
+.PHONY : lib/token.cpp.s
+
 src/ir.o: src/ir.cpp.o
 
 .PHONY : src/ir.o
@@ -177,33 +231,6 @@ src/node.cpp.s:
 	$(MAKE) -f CMakeFiles/Compile.dir/build.make CMakeFiles/Compile.dir/src/node.cpp.s
 .PHONY : src/node.cpp.s
 
-src/parser.o: src/parser.cpp.o
-
-.PHONY : src/parser.o
-
-# target to build an object file
-src/parser.cpp.o:
-	$(MAKE) -f CMakeFiles/Compile.dir/build.make CMakeFiles/Compile.dir/src/parser.cpp.o
-.PHONY : src/parser.cpp.o
-
-src/parser.i: src/parser.cpp.i
-
-.PHONY : src/parser.i
-
-# target to preprocess a source file
-src/parser.cpp.i:
-	$(MAKE) -f CMakeFiles/Compile.dir/build.make CMakeFiles/Compile.dir/src/parser.cpp.i
-.PHONY : src/parser.cpp.i
-
-src/parser.s: src/parser.cpp.s
-
-.PHONY : src/parser.s
-
-# target to generate assembly for a file
-src/parser.cpp.s:
-	$(MAKE) -f CMakeFiles/Compile.dir/build.make CMakeFiles/Compile.dir/src/parser.cpp.s
-.PHONY : src/parser.cpp.s
-
 src/symtab.o: src/symtab.cpp.o
 
 .PHONY : src/symtab.o
@@ -231,33 +258,6 @@ src/symtab.cpp.s:
 	$(MAKE) -f CMakeFiles/Compile.dir/build.make CMakeFiles/Compile.dir/src/symtab.cpp.s
 .PHONY : src/symtab.cpp.s
 
-src/token.o: src/token.cpp.o
-
-.PHONY : src/token.o
-
-# target to build an object file
-src/token.cpp.o:
-	$(MAKE) -f CMakeFiles/Compile.dir/build.make CMakeFiles/Compile.dir/src/token.cpp.o
-.PHONY : src/token.cpp.o
-
-src/token.i: src/token.cpp.i
-
-.PHONY : src/token.i
-
-# target to preprocess a source file
-src/token.cpp.i:
-	$(MAKE) -f CMakeFiles/Compile.dir/build.make CMakeFiles/Compile.dir/src/token.cpp.i
-.PHONY : src/token.cpp.i
-
-src/token.s: src/token.cpp.s
-
-.PHONY : src/token.s
-
-# target to generate assembly for a file
-src/token.cpp.s:
-	$(MAKE) -f CMakeFiles/Compile.dir/build.make CMakeFiles/Compile.dir/src/token.cpp.s
-.PHONY : src/token.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -267,21 +267,21 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... Compile"
 	@echo "... edit_cache"
+	@echo "... lib/parser.o"
+	@echo "... lib/parser.i"
+	@echo "... lib/parser.s"
+	@echo "... lib/token.o"
+	@echo "... lib/token.i"
+	@echo "... lib/token.s"
 	@echo "... src/ir.o"
 	@echo "... src/ir.i"
 	@echo "... src/ir.s"
 	@echo "... src/node.o"
 	@echo "... src/node.i"
 	@echo "... src/node.s"
-	@echo "... src/parser.o"
-	@echo "... src/parser.i"
-	@echo "... src/parser.s"
 	@echo "... src/symtab.o"
 	@echo "... src/symtab.i"
 	@echo "... src/symtab.s"
-	@echo "... src/token.o"
-	@echo "... src/token.i"
-	@echo "... src/token.s"
 .PHONY : help
 
 

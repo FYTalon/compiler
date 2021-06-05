@@ -1,12 +1,12 @@
 file(REMOVE_RECURSE
-  "../src/parser.cpp"
-  "../src/parser.hpp"
-  "../src/token.cpp"
+  "../lib/parser.cpp"
+  "../lib/parser.hpp"
+  "../lib/token.cpp"
   "CMakeFiles/Compile.dir/src/ir.cpp.o"
   "CMakeFiles/Compile.dir/src/node.cpp.o"
-  "CMakeFiles/Compile.dir/src/parser.cpp.o"
   "CMakeFiles/Compile.dir/src/symtab.cpp.o"
-  "CMakeFiles/Compile.dir/src/token.cpp.o"
+  "CMakeFiles/Compile.dir/lib/parser.cpp.o"
+  "CMakeFiles/Compile.dir/lib/token.cpp.o"
   "Compile.pdb"
   "Compile"
 )

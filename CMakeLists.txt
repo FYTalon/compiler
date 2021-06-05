@@ -3,10 +3,11 @@ project(Compile VERSION 0.1.0)
 
 find_package(BISON)
 find_package(FLEX)
-BISON_TARGET(Parser src/parser.y ${PROJECT_SOURCE_DIR}/src/parser.cpp)
-FLEX_TARGET(Scanner src/token.l  ${PROJECT_SOURCE_DIR}/src/token.cpp)
+BISON_TARGET(Parser src/parser.y ${PROJECT_SOURCE_DIR}/lib/parser.cpp)
+FLEX_TARGET(Scanner src/token.l  ${PROJECT_SOURCE_DIR}/lib/token.cpp)
 ADD_FLEX_BISON_DEPENDENCY(Scanner Parser)
 include_directories(src)
+include_directories(lib)
 
 file(GLOB srcs src/*.cpp)
 
