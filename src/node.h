@@ -389,16 +389,16 @@ public:
         char s[100];
         memset(s, 0, sizeof(s));
         Symbol* tmp = lookup(name->name);
-        if(tmp->memloc == 269){
+        //if(tmp->memloc == 269){
             int id = max_index[1]++;
             fprintf(Eeyore, "var t%d\n", id);
             sprintf(s, "t%d = call f_%s\n", id, name->name->c_str());
             Context += s;
             return new Symbol(0, id, 't');
-        }
+        /*}
         sprintf(s, "call f_%s\n", name->name->c_str());
         Context += s;
-        return new Symbol();
+        return new Symbol();*/
     }
 };
 
