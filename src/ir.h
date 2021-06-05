@@ -4,6 +4,7 @@
 #include "parser.tab.hpp"
 
 extern NRoot* root;
+extern FILE *Eeyore;
 
 void generate();
 

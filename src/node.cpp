@@ -1,9 +1,7 @@
 #include "node.h"
 #include "parser.tab.hpp"
 
-
-FILE *Eeyore = stdout;
-
+FILE *Eeyore;
 string Context;
 vector<int>Start, End;
 
