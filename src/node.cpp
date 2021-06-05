@@ -1,5 +1,5 @@
 #include "node.h"
-#include "parser.hpp"
+#include "parser.tab.hpp"
 
 
 FILE *Eeyore = stdout;

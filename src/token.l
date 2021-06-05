@@ -1,7 +1,7 @@
 %{
 #include <string>
 #include "node.h"
-#include "parser.hpp"
+#include "parser.tab.hpp"
 using namespace std;
 
 #define SAVE       yylval.str = new string(yytext, yyleng)

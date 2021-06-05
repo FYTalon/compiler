@@ -3,7 +3,7 @@
 #include "ir.h"
 #include <cstdio>
 #include <cstdlib>
-#include "parser.hpp"
+#include "parser.tab.hpp"
 #define YYERROR_VERBOSE true
 #define YYDEBUG 1
 using namespace std;
