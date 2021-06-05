@@ -32,15 +32,15 @@ Symbol* NBinaryExpression::generate_ir(){
                 if(lhs->memloc == 0) return r->generate_ir();
                 else return new Symbol(0, 1, ' ');
             }
+            memset(s, 0, sizeof(s));
             int l1 = max_index[3]++, l2 = max_index[3]++, id = max_index[1]++;
             sprintf(s, "if %c%d != 0 goto l%d\n", lhs->type, lhs->memloc, l1);
             Context += s;
-            memset(s, 0, sizeof(s));
             Symbol* rhs = r->generate_ir();
-            fprintf(Eeyore, "var t%d\n", id);
-            sprintf(s, "t%d = %c%d\ngoto l%d:\nl%d:\nt%d = 1\nl%d:\n", id, rhs->type, rhs->memloc, l2, l1, id, l2);
-            Context += s;
             memset(s, 0, sizeof(s));
+            fprintf(Eeyore, "var t%d\n", id);
+            sprintf(s, "t%d = %c%d\ngoto l%d\nl%d:\nt%d = 1\nl%d:\n", id, rhs->type, rhs->memloc, l2, l1, id, l2);
+            Context += s;
             return new Symbol(0, id, 't');
         }
 
@@ -76,6 +76,7 @@ Symbol* NBinaryExpression::generate_ir(){
             int id = max_index[1]++;
             
             fprintf(Eeyore, "var t%d\n", id);
+            memset(s, 0, sizeof(s));
             switch(op){
                 case MUL:
                     sprintf(s, "t%d = %c%d * %c%d\n", id, lhs->type, lhs->memloc, rhs->type, rhs->memloc);
