@@ -122,6 +122,7 @@ public:
         //Context += s;
         string str = *name->name + "[]";
         Symbol *index = new Symbol(0, 0, ' ');
+        tmplate = "";
         for(NExpression* exp : shape){
             Symbol *sz = lookup(&str);
             Symbol *tmp = exp->generate_ir();
@@ -258,7 +259,6 @@ public:
                 memset(s, 0, sizeof(s));
                 sprintf(s, "T%d[%d]", id, pos * 4);
                 string str = s;
-                //printf("%s", s);
                 insert(&str, 0, tmp->memloc, tmp->type);
             }
             memset(s, 0, sizeof(s));
@@ -277,6 +277,10 @@ public:
                 memset(s, 0, sizeof(s));
                 sprintf(s, "T%d[%d] = %c%d\n", id, pos * 4, ' ', 0);
                 Context += s;
+                memset(s, 0, sizeof(s));
+                sprintf(s, "T%d[%d]", id, pos * 4);
+                string str = s;
+                insert(&str, 0, 0, ' ');
                 pos++;
             }
         }
