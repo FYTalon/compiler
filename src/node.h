@@ -391,6 +391,7 @@ public:
         Symbol* tmp = lookup(name->name);
         if(tmp->memloc == 269){
             int id = max_index[1]++;
+            fprintf(Eeyore, "var t%d\n", id);
             sprintf(s, "t%d = call f_%s\n", id, name->name->c_str());
             Context += s;
             return new Symbol(0, id, 't');
