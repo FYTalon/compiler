@@ -248,12 +248,28 @@ public:
         fprintf(Eeyore, "var %d T%d\n", len, id);
         int pos = 0;
         if(value != NULL) initial(value, shape, id, pos, 0);
+        while(cst && pos < shape[0]){
+            char s[100];
+            memset(s, 0, sizeof(s));
+            sprintf(s, "T%d[%d] = %c%d\n", id, pos * 4, ' ', 0);
+            Context += s;
+            memset(s, 0, sizeof(s));
+            sprintf(s, "T%d[%d]", id, pos * 4);
+            string str = s;
+            insert(&str, 0, 0, ' ');
+            pos++;
+        }
         return new Symbol();
     }
 
     void initial(NArrayInitVal* val, vector<int>&shape, int id, int &pos, int deep){
         if(val->end){
-            Symbol* tmp = val->val->generate_ir();
+            if(val->val == NULL && !cst){
+                pos++;
+                return ;
+            }
+            Symbol* tmp = new Symbol(0, 0, ' ');
+            if(val->val != NULL) tmp = val->val->generate_ir();
             char s[100];
             if(cst){
                 memset(s, 0, sizeof(s));
