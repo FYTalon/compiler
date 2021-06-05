@@ -22,7 +22,7 @@ Symbol* NBinaryExpression::generate_ir(){
             Symbol* rhs = r->generate_ir();
             memset(s, 0, sizeof(s));
             fprintf(Eeyore, "var t%d\n", id);
-            sprintf(s, "t%d = %c%d\ngoto l%d:\nl%d:\nt%d = 0\nl%d:\n", id, rhs->type, rhs->memloc, l2, l1, id, l2);
+            sprintf(s, "t%d = %c%d\ngoto l%d\nl%d:\nt%d = 0\nl%d:\n", id, rhs->type, rhs->memloc, l2, l1, id, l2);
             Context += s;
             return new Symbol(0, id, 't');
         }
