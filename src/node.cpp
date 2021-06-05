@@ -136,6 +136,7 @@ Symbol* NUnaryExpression::generate_ir(){
             fprintf(Eeyore, "var t%d\n", id);
             char s[100];
             memset(s, 0, sizeof(s));
+            Symbol *rt = new Symbol(0, id, 't');
             switch(op){
                 case PLUS:
                     sprintf(s, "t%d = %c%d\n", id, tmp->type, tmp->memloc);
@@ -149,6 +150,6 @@ Symbol* NUnaryExpression::generate_ir(){
                     //rt->memloc = !rt->memloc;
             }
             Context += s;
-            return tmp;
+            return rt;
         }
     }
