@@ -17,7 +17,7 @@ public:
     Symbol(){
         paranum = 0;
         memloc =  -1;
-        type = 'T';
+        type = 'Z';
     }
 };
 

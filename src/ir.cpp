@@ -6,7 +6,7 @@ void generate(){
     root->generate_ir();
 }
 
-int main(){
+int main(int argc, char *argv[]){
     yyparse();
     generate();
 }

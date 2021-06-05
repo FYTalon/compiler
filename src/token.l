@@ -7,6 +7,7 @@ using namespace std;
 #define SAVE       yylval.str = new string(yytext, yyleng)
 #define TOKEN(t)   (yylval.token = t)
 #define SKIP for(auto i : string(yytext_ptr)) { if(i == '\n') yylineno++; }
+#define CHANGE2LINENO *yy_cp = yy_hold_char;yy_hold_char='(';yy_cp--;yyleng--;yy_c_buf_p--;*yy_c_buf_p='_';yy_c_buf_p--;*yy_c_buf_p='_';yy_c_buf_p--;*yy_c_buf_p='E';yy_c_buf_p--;*yy_c_buf_p='N';yy_c_buf_p--;*yy_c_buf_p='I';yy_c_buf_p--; *yy_c_buf_p='L'; yy_c_buf_p--; *yy_c_buf_p='_'; yy_c_buf_p--; *yy_c_buf_p='_'; yy_c_buf_p--; return IDENTIFIER;
 %}
 
 %option noyywrap
@@ -29,6 +30,7 @@ using namespace std;
                                     }
 [ ]                                 ;
 \n                                  yylineno++;
+\r                                  yylineno++;
 \t                                  ;
 "if"                                return TOKEN(IF);
 "else"                              return TOKEN(ELSE);
@@ -39,6 +41,11 @@ using namespace std;
 "const"                             return TOKEN(CONST);
 "int"                               return TOKEN(INT);
 "void"                              return TOKEN(VOID);
+
+
+"starttime"[ \t\n]*"("              SKIP; yylval.str = new string("_sysy_starttime"); CHANGE2LINENO;
+"stoptime"[ \t\n]*"("               SKIP; yylval.str = new string("_sysy_stoptime"); CHANGE2LINENO;
+"__LINE__"                          yylval.str = new string(to_string(yyget_lineno())); return DINTEGER;
 
 [a-zA-Z_][a-zA-Z_0-9]*              SAVE; return IDENTIFIER;
 [1-9][0-9]*                         SAVE; return DINTEGER;

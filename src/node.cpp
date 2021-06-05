@@ -2,7 +2,7 @@
 #include "parser.hpp"
 
 
-FILE *Eeyore;
+FILE *Eeyore = stdout;
 
 string Context;
 vector<int>Start, End;
@@ -11,23 +11,22 @@ int max_index[4];
 
 Symbol* NBinaryExpression::generate_ir(){
         char s[100];
-        memset(s, 0, sizeof(s));
         if(op == AND){
             Symbol* lhs = l->generate_ir();
             if(lhs->type == ' '){
                 if(lhs->memloc != 0) return r->generate_ir();
                 else return new Symbol(0, 0, ' ');
             }
+            memset(s, 0, sizeof(s));
             int l1 = max_index[3]++, l2 = max_index[3]++, id = max_index[1]++;
             sprintf(s, "if %c%d == 0 goto l%d\n", lhs->type, lhs->memloc, l1);
             Context += s;
-            memset(s, 0, sizeof(s));
             Symbol* rhs = r->generate_ir();
+            memset(s, 0, sizeof(s));
             fprintf(Eeyore, "var t%d\n", id);
             sprintf(s, "t%d = %c%d\ngoto l%d:\nl%d:\nt%d = 0\nl%d:\n", id, rhs->type, rhs->memloc, l2, l1, id, l2);
             Context += s;
-            memset(s, 0, sizeof(s));
-            return new Symbol(0, 't', id);
+            return new Symbol(0, id, 't');
         }
         else if(op == OR){
             Symbol* lhs = l->generate_ir();
@@ -44,7 +43,7 @@ Symbol* NBinaryExpression::generate_ir(){
             sprintf(s, "t%d = %c%d\ngoto l%d:\nl%d:\nt%d = 1\nl%d:\n", id, rhs->type, rhs->memloc, l2, l1, id, l2);
             Context += s;
             memset(s, 0, sizeof(s));
-            return new Symbol(0, 't', id);
+            return new Symbol(0, id, 't');
         }
 
         Symbol* lhs = l->generate_ir();

@@ -34,6 +34,23 @@ public:
     virtual Symbol* generate_ir(){
         init();
         EnterBlock();
+        string s = "getint";
+        insert(&s, 0, 269, 'F');
+        s = "getch";
+        insert(&s, 0, 269, 'F');
+        s = "getarray";
+        insert(&s, 1, 269, 'F');
+        s = "putint";
+        insert(&s, 1, 270, 'F');
+        s = "putch";
+        insert(&s, 1, 270, 'F');
+        s = "putint";
+        insert(&s, 2, 270, 'F');
+        s = "_sysy_starttime";
+        insert(&s, 1, 270, 'F');
+        s = "_sysy_stoptime";
+        insert(&s, 1, 270, 'F');
+        
         for(Node* it : context)
             it->generate_ir();
         return new Symbol();
@@ -79,17 +96,80 @@ public:
     NIdentifier(){};
     NIdentifier(string* _) : name(_) {}
 
-    virtual Symbol* generate_ir(){}
+    virtual Symbol* generate_ir(){
+        return lookup(name);
+    }
+    virtual void update(){};
 };
 
 class NArrayIdentifier : public NIdentifier{
 public:
     NIdentifier* name;
     vector<NExpression*> shape;
+    string tmplate;
     NArrayIdentifier(NIdentifier* _name){
         name = _name; 
     }
-    virtual Symbol* generate_ir(){}
+    virtual Symbol* generate_ir(){
+        Symbol* sym = lookup(name->name);
+        int id = -1, id_ = -1;
+        //fprintf(Eeyore, "var t%d\n", id);
+        //fprintf(Eeyore, "var t%d\n", id_);
+        char s[100];
+        //memset(s, 0, sizeof(s));
+        //sprintf(s, "t%d = 0\n", id);
+        //Context += s;
+        string str = *name->name + "[]";
+        Symbol *index = new Symbol(0, 0, ' ');
+        for(NExpression* exp : shape){
+            Symbol *sz = lookup(&str);
+            Symbol *tmp = exp->generate_ir();
+            
+            if(tmp->type == ' ' && index->type == ' '){
+                index->memloc += sz->paranum * tmp->memloc;
+            }
+            else {
+                if(id == -1){
+                    id = max_index[1]++;
+                    id_ = max_index[1]++;
+                    fprintf(Eeyore, "var t%d\n", id);
+                    fprintf(Eeyore, "var t%d\n", id_);
+                    memset(s, 0, sizeof(s));
+                    sprintf(s, "t%d = %d\n", id, index->memloc);
+                    Context += s;
+                }
+                memset(s, 0, sizeof(s));
+                sprintf(s, "t%d = %d\nt%d = t%d * %c%d\nt%d = t%d + t%d\n", id_, sz->paranum, id_, id_, tmp->type, tmp->memloc, id, id, id_);
+                Context += s;
+            }
+            str += "[]";
+        }
+        if(id == -1){
+            memset(s, 0, sizeof(s));
+            sprintf(s, "%c%d[%d]", sym->type, sym->memloc, index->memloc * 4);
+            str = s;
+            //printf("%s", s);
+            Symbol* cst = lookup(&str);
+            if(cst->type != 'Z') return cst;
+            id = max_index[1]++;
+            id_ = max_index[1]++;
+            fprintf(Eeyore, "var t%d\n", id);
+            fprintf(Eeyore, "var t%d\n", id_);
+            memset(s, 0, sizeof(s));
+            sprintf(s, "t%d = %d\n", id, index->memloc);
+            Context += s;
+        }
+        memset(s, 0, sizeof(s));
+        sprintf(s, "t%d = t%d * 4\nt%d = t%d\nt%d = %c%d[t%d]\n", id, id, id_, id, id, sym->type, sym->memloc, id);
+        Context += s;
+        memset(s, 0, sizeof(s));
+        sprintf(s, "%c%d[t%d] = t%d\n", sym->type, sym->memloc, id_, id);
+        tmplate = s;
+        return new Symbol(0, id, 't');
+    }
+    virtual void update(){
+        Context += tmplate;
+    }
 };
 
 class NArrayInitVal : public NExpression{
@@ -117,20 +197,27 @@ class NVarDeclare : public NDeclare{
 public:
     NIdentifier* name;
     NExpression* value;
-    NVarDeclare(NIdentifier* identation) : name(identation) { value = NULL; }
-    NVarDeclare(NIdentifier* identation, NExpression* expression) : name(identation), value(expression) {}
+    bool cst;
+    NVarDeclare(NIdentifier* identation, NExpression* expression = NULL, bool flag = false) : name(identation), value(expression), cst(flag) {}
     virtual Symbol* generate_ir(){
         int id;
-        insert(name->name, 0, id = max_index[0]++, 'T');
-        fprintf(Eeyore, "var T%d\n", id);
-        if(value != NULL){
-            Symbol* tmp = value->generate_ir();
-            char s[100];
-            memset(s, 0, sizeof(s));
-            sprintf(s, "T%d = %c%d\n", id, tmp->type, tmp->memloc);
-            Context += s;
+        if(!cst){
+            insert(name->name, 0, id = max_index[0]++, 'T');
+            fprintf(Eeyore, "var T%d\n", id);
+            if(value != NULL){
+                Symbol* tmp = value->generate_ir();
+                char s[100];
+                memset(s, 0, sizeof(s));
+                sprintf(s, "T%d = %c%d\n", id, tmp->type, tmp->memloc);
+                Context += s;
+            }
+            return new Symbol();
         }
-        return new Symbol();
+        else {
+            Symbol* tmp = value->generate_ir();
+            insert(name->name, 0, tmp->memloc, ' ');
+            return new Symbol();
+        }
     }
 };
 
@@ -138,8 +225,8 @@ class NArrayDeclare : public NDeclare{
 public:
     NArrayIdentifier* name;
     NArrayInitVal* value;
-    NArrayDeclare(NArrayIdentifier* identation) : name(identation) { value = NULL;}
-    NArrayDeclare(NArrayIdentifier* identation, NArrayInitVal* expression) : name(identation), value(expression) {}
+    bool cst;
+    NArrayDeclare(NArrayIdentifier* identation, NArrayInitVal* expression = NULL, bool flag = false) : name(identation), value(expression), cst(flag) {}
     virtual Symbol* generate_ir(){
         int id, len = 4;
         vector<int>shape;
@@ -151,15 +238,28 @@ public:
         for(int i = shape.size() - 2; ~i ; i--)
             shape[i] *= shape[i + 1];
         insert(name->name->name, 0, id = max_index[0]++, 'T');
+        string str = *name->name->name;
+        for(int i = 0; i < shape.size(); i++, str += "[]"){
+            insert(&str, shape[i], id, 'T');
+        }
+        insert(&str, 1, id, 'T');
         fprintf(Eeyore, "var %d T%d\n", len, id);
         int pos = 0;
-        initial(value, shape, id, pos, 0);
+        if(value != NULL) initial(value, shape, id, pos, 0);
+        return new Symbol();
     }
 
     void initial(NArrayInitVal* val, vector<int>&shape, int id, int &pos, int deep){
         if(val->end){
             Symbol* tmp = val->val->generate_ir();
             char s[100];
+            if(cst){
+                memset(s, 0, sizeof(s));
+                sprintf(s, "T%d[%d]", id, pos * 4);
+                string str = s;
+                //printf("%s", s);
+                insert(&str, 0, tmp->memloc, tmp->type);
+            }
             memset(s, 0, sizeof(s));
             sprintf(s, "T%d[%d] = %c%d\n", id, pos * 4, tmp->type, tmp->memloc);
             Context += s;
@@ -170,6 +270,15 @@ public:
         for(NArrayInitVal* v : val->value){
             initial(v, shape, id, pos, deep + 1);
         }
+        if(cst){
+            while(pos < plus){
+                char s[100];
+                memset(s, 0, sizeof(s));
+                sprintf(s, "T%d[%d] = %c%d\n", id, pos * 4, ' ', 0);
+                Context += s;
+                pos++;
+            }
+        }
         pos = plus;
     }
 
@@ -177,9 +286,39 @@ public:
 
 class NFunctionDefineArg : public NExpression{
 public:
+    virtual Symbol* generate_ir(){}
+};
+
+class NFunctionDefineArgArray : public NFunctionDefineArg{
+public:
+    int type;
+    NArrayIdentifier* name;
+    NFunctionDefineArgArray(int _type, NArrayIdentifier* _name) : 
+    type(_type), name(_name) {}
+    virtual Symbol* generate_ir(){
+        int id;
+        vector<int>shape;
+        for(NExpression* exp : name->shape){
+            int x = exp->generate_ir()->memloc;
+            shape.push_back(x);
+        }
+        for(int i = shape.size() - 2; ~i ; i--)
+            shape[i] *= shape[i + 1];
+        insert(name->name->name, 0, id = max_index[2]++, 'p');
+        string str = *name->name->name;
+        for(int i = 0; i < shape.size(); i++, str += "[]"){
+            insert(&str, shape[i], id, 'p');
+        }
+        insert(&str, 1, id, 'p');
+        return new Symbol();
+    }
+};
+
+class NFunctionDefineArgVar : public NFunctionDefineArg{
+public:
     int type;
     NIdentifier* name;
-    NFunctionDefineArg(int _type, NIdentifier* _name) : 
+    NFunctionDefineArgVar(int _type, NIdentifier* _name) : 
     type(_type), name(_name) {}
     virtual Symbol* generate_ir(){
         int id;
@@ -209,6 +348,7 @@ public:
     type(_type), name(_name), args(_args), body(_body) {}
     virtual Symbol* generate_ir(){
         insert(name->name, args->list.size(), type, 'F');
+        fprintf(Eeyore, "%s", Context.c_str());
         fprintf(Eeyore, "f_%s [%d]\n", name->name->c_str(), (int)args->list.size());
         Context.clear();
         body->enter = true;
@@ -217,8 +357,9 @@ public:
         args->generate_ir();
         body->generate_ir();
         ExitBlock();
-        fprintf(Eeyore, "%s\n", Context.c_str());
+        fprintf(Eeyore, "%s", Context.c_str());
         fprintf(Eeyore, "end f_%s\n", name->name->c_str());
+        Context.clear();
         return new Symbol();
     }
 };
@@ -251,9 +392,12 @@ public:
         if(tmp->memloc == 269){
             int id = max_index[1]++;
             sprintf(s, "t%d = call f_%s\n", id, name->name->c_str());
+            Context += s;
+            return new Symbol(0, id, 't');
         }
-        else sprintf(s, "call f_%s\n", name->name->c_str());
+        sprintf(s, "call f_%s\n", name->name->c_str());
         Context += s;
+        return new Symbol();
     }
 };
 
@@ -263,12 +407,13 @@ public:
     NExpression* r;
     NAssignment(NIdentifier* _l, NExpression* _r) : l(_l), r(_r) {}
     virtual Symbol* generate_ir(){
-        Symbol* tmp = lookup(l->name);
+        Symbol* tmp = l->generate_ir();
         Symbol* rhs = r->generate_ir();
         char s[100];
         memset(s, 0, sizeof(s));
         sprintf(s, "%c%d = %c%d\n", tmp->type, tmp->memloc, rhs->type, rhs->memloc);
         Context += s;
+        l->update();
         return tmp;
     }
 };
@@ -346,7 +491,7 @@ public:
         End.push_back(end);
         stmt->generate_ir();
         memset(s, 0, sizeof(s));
-        sprintf(s, "l%d:\n", end);
+        sprintf(s, "goto l%d\nl%d:\n", bg, end);
         Context += s;
         Start.pop_back();
         End.pop_back();

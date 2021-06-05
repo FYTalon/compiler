@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include "parser.hpp"
+#define YYERROR_VERBOSE true
+#define YYDEBUG 1
 using namespace std;
 
 extern int yydebug;
@@ -114,12 +116,12 @@ ConstDef: ConstDefSingle { $$ = $1; }
         ;
 
 ConstDefSingle: IDENT ASSIGN InitVal {
-                $$ = new NVarDeclare($1, $3);
+                $$ = new NVarDeclare($1, $3, true);
             }
             ;
 
 ConstDefArray: DefArrayName ASSIGN InitValArray {
-                $$ = new NArrayDeclare($1, $3);
+                $$ = new NArrayDeclare($1, $3, true);
             }
             ;
 
@@ -210,17 +212,17 @@ FuncFParam: FuncFParamOne { $$ = $1; }
           | FuncFParamArray { $$ = $1; }
           ;
 
-FuncFParamOne: BType IDENT { $$ = new NFunctionDefineArg($1, $2); }
+FuncFParamOne: BType IDENT { $$ = new NFunctionDefineArgVar($1, $2); }
             ;
 
 FuncFParamArray: BType IDENT LSQUARE RSQUARE {
-                    $$ = new NFunctionDefineArg($1, 
+                    $$ = new NFunctionDefineArgArray($1, 
                         new NArrayIdentifier($2));
-                    ((NArrayIdentifier*)$$->name)->shape.push_back(new NNumber());
+                    ((NFunctionDefineArgArray*)$$)->name->shape.push_back(new NNumber());
                 }
                 | FuncFParamArray LSQUARE Exp RSQUARE{
                     $$ = $1;
-                    ((NArrayIdentifier*)$$->name)->shape.push_back($3);
+                    ((NFunctionDefineArgArray*)$$)->name->shape.push_back($3);
                 }
                 ;
 
@@ -259,10 +261,10 @@ Stmt: AssignStmt { $$ = $1; }
 
 AssignStmt: LVal ASSIGN Exp SEMI { $$ = new NAssignment($1, $3); }
 
-IfStmt :  IF LPAREN Cond RPAREN Stmt SEMI {
+IfStmt :  IF LPAREN Cond RPAREN Stmt{
             $$ = new NIfElse($3, $5, new NVoid());
         }
-        | IF LPAREN Cond RPAREN Stmt ELSE Stmt SEMI{
+        | IF LPAREN Cond RPAREN Stmt ELSE Stmt{
             $$ = new NIfElse($3, $5, $7);
         }
 
