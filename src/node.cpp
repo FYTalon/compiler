@@ -4,6 +4,7 @@
 FILE *Eeyore;
 string Context;
 vector<int>Start, End;
+bool rn;
 
 int max_index[4];
 

@@ -14,6 +14,7 @@ extern FILE *Eeyore;
 
 extern string Context;
 extern vector<int>Start, End;
+extern bool rn;
 
 extern int max_index[4];
 /*
@@ -347,6 +348,7 @@ public:
     NFunctionDefine(int _type, NIdentifier* _name, NFunctionDefineArgList* _args, NBlock* _body) :
     type(_type), name(_name), args(_args), body(_body) {}
     virtual Symbol* generate_ir(){
+        rn = false;
         insert(name->name, args->list.size(), type, 'F');
         fprintf(Eeyore, "%s", Context.c_str());
         fprintf(Eeyore, "f_%s [%d]\n", name->name->c_str(), (int)args->list.size());
@@ -358,6 +360,9 @@ public:
         body->generate_ir();
         ExitBlock();
         fprintf(Eeyore, "%s", Context.c_str());
+        if(!rn){
+            fprintf(Eeyore, "return\n");
+        }
         fprintf(Eeyore, "end f_%s\n", name->name->c_str());
         Context.clear();
         return new Symbol();
@@ -389,16 +394,16 @@ public:
         char s[100];
         memset(s, 0, sizeof(s));
         Symbol* tmp = lookup(name->name);
-        //if(tmp->memloc == 269){
+        if(tmp->memloc == 269){
             int id = max_index[1]++;
             fprintf(Eeyore, "var t%d\n", id);
             sprintf(s, "t%d = call f_%s\n", id, name->name->c_str());
             Context += s;
             return new Symbol(0, id, 't');
-        /*}
+        }
         sprintf(s, "call f_%s\n", name->name->c_str());
         Context += s;
-        return new Symbol();*/
+        return new Symbol();
     }
 };
 
@@ -535,6 +540,7 @@ public:
         }
         else 
             sprintf(s, "return\n");
+        rn = true;
         Context += s;
         return new Symbol();
     }
