@@ -4,12 +4,12 @@
 extern TRoot *root;
 
 int main(int argc, char *argv[]){
-    /*freopen(argv[3], "r", stdin);
+    freopen(argv[3], "r", stdin);
     Tigger = fopen(argv[5], "w");
     zzparse();
     root->generate_ir();
-    fclose(Tigger);*/
-    Tigger = stdout;
+    fclose(Tigger);
+    /*Tigger = stdout;
     zzparse();
-    root->generate_ir();
+    root->generate_ir();*/
 }
