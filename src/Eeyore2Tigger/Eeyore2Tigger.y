@@ -28,11 +28,11 @@ void zzerror(const char *s){ printf("Error:%s\natline: %d: \n", s, zzget_lineno(
     TValue* value;
 }
 
-%token <str> FUNCIDENT INTEGER;
-%token <var> VAR LABEL
-%token <token> END CALL PARAM IF GOTO RETURN VARDEF
-%token <str> ASSIGN EQ NQ LT LQ GT GQ AND OR NOT PLUS MINUS MUL DIV MOD
-%token <token> LPAREN RPAREN LSQUARE RSQUARE LBRACE RBRACE COLON
+%token <str> EFUNCIDENT EINTEGER;
+%token <var> EVAR ELABEL
+%token <token> EEND ECALL EPARAM EIF EGOTO ERETURN EVARDEF
+%token <str> EASSIGN EEQ ENQ ELT ELQ EGT EGQ EAND EOR ENOT EPLUS EMINUS EMUL EDIV EMOD
+%token <token> ELPAREN ERPAREN ELSQUARE ERSQUARE ELBRACE ERBRACE ECOLON
 
 %type <root> Program
 
@@ -55,26 +55,26 @@ Program: Program Declaration {
        | Program FunctionDef {
            $$->context.push_back($2);
        }
-       | { $$ = new TRoot(); root = $$; }
+       | { $$ = new TRoot(); Troot = $$; }
        ;
 
-Declaration: VARDEF INTEGER VAR {
+Declaration: EVARDEF EINTEGER EVAR {
                 $$ = new TDeclare($2, $3);
            }
-           | VARDEF VAR {
+           | EVARDEF EVAR {
                 $$ = new TDeclare(NULL, $2);
            }
            ;
 
-Initialization: VAR ASSIGN INTEGER {
+Initialization: EVAR EASSIGN EINTEGER {
                    $$ = new TInitialize($1, NULL, $3);
               }
-              | VAR LSQUARE INTEGER RSQUARE ASSIGN INTEGER {
+              | EVAR ELSQUARE EINTEGER ERSQUARE EASSIGN EINTEGER {
                    $$ = new TInitialize($1, $3, $6);
               }
               ;
 
-FunctionDef: FUNCIDENT LSQUARE INTEGER RSQUARE Statements END FUNCIDENT {
+FunctionDef: EFUNCIDENT ELSQUARE EINTEGER ERSQUARE Statements EEND EFUNCIDENT {
                 $$ = new TFunctionDef($1, $3, $5);
            }
            ;
@@ -91,72 +91,72 @@ Statement: Expression { $$ = $1; }
         | Declaration { $$ = $1; }
         ;
 
-Expression: VAR ASSIGN RVal BinaryOp RVal {
+Expression: EVAR EASSIGN RVal BinaryOp RVal {
               $$ = new TBinaryExpression($1, $3, $4, $5);
           }
-          | VAR ASSIGN UnaryOp RVal {
+          | EVAR EASSIGN UnaryOp RVal {
               $$ = new TUnaryExpression($1, $3, $4);
           }
-          | VAR ASSIGN RVal {
+          | EVAR EASSIGN RVal {
               $$ = new TExpression($1, $3);
           }
-          | VAR LSQUARE RVal RSQUARE ASSIGN RVal {
+          | EVAR ELSQUARE RVal ERSQUARE EASSIGN RVal {
               $$ = new TV2AExpression($1, $3, $6);
           }
-          | VAR ASSIGN VAR LSQUARE RVal RSQUARE {
+          | EVAR EASSIGN EVAR ELSQUARE RVal ERSQUARE {
               $$ = new TA2VExpression($1, $5, $3);
           }
-          | IF RVal LogicOp RVal GOTO LABEL {
+          | EIF RVal LogicOp RVal EGOTO ELABEL {
               $$ = new TIfExpression($2, $3, $4, $6);
           }
-          | GOTO LABEL {
+          | EGOTO ELABEL {
               $$ = new TIfExpression(NULL, NULL, NULL, $2);
           }
-          | LABEL COLON {
+          | ELABEL ECOLON {
               $$ = new TLabel($1);
           }
-          | PARAM RVal {
+          | EPARAM RVal {
               $$ = new TParam($2);
           }
-          | CALL FUNCIDENT {
+          | ECALL EFUNCIDENT {
               $$ = new TFunctionCall(NULL, $2);
           }
-          | VAR ASSIGN CALL FUNCIDENT {
+          | EVAR EASSIGN ECALL EFUNCIDENT {
               $$ = new TFunctionCall($1, $4);
           }
-          | RETURN RVal {
+          | ERETURN RVal {
               $$ = new TReturn($2);
           }
-          | RETURN {
+          | ERETURN {
               $$ = new TReturn();
           }
           ;
 
-RVal: VAR { $$ = new TValue($1); }
-    | INTEGER { $$ = new TValue(NULL, $1); }
+RVal: EVAR { $$ = new TValue($1); }
+    | EINTEGER { $$ = new TValue(NULL, $1); }
     ;
 
 BinaryOp: UnaryOp
         | LogicOp
         ;
 
-UnaryOp: MINUS
-       | NOT
+UnaryOp: EMINUS
+       | ENOT
        ;
 
-LogicOp: EQ
-       | NQ
-       | LT
-       | LQ
-       | GT
-       | GQ
-       | AND
-       | OR
-       | PLUS
-       | MINUS
-       | MUL
-       | DIV
-       | MOD
+LogicOp: EEQ
+       | ENQ
+       | ELT
+       | ELQ
+       | EGT
+       | EGQ
+       | EAND
+       | EOR
+       | EPLUS
+       | EMINUS
+       | EMUL
+       | EDIV
+       | EMOD
        ;
 
 
