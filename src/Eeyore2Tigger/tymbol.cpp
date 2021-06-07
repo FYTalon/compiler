@@ -44,7 +44,7 @@ void insert(string *name, int len, bool flag){
     }
 }
 
-void init(){
+void Einit(){
     max_id = 0;
     inblock = false;
     V2R.clear();

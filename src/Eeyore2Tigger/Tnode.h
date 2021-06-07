@@ -24,7 +24,7 @@ class TRoot : public TNode{
 public:
     vector<TNode*>context;
     virtual void generate_ir(){
-        init();
+        Einit();
         for(auto i : context){
             i->generate_ir();
         }
@@ -32,7 +32,7 @@ public:
     }
 };
 
-extern TRoot* root;
+extern TRoot* Troot;
 
 class TStatement : public TNode{
 public:

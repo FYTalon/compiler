@@ -25,7 +25,7 @@ int get_max();
 
 void insert(string *name, int len, bool flag);
 
-void init();
+void Einit();
 
 string get_var(string *name);
 

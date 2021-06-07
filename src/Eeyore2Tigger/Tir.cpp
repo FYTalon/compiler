@@ -1,15 +1,9 @@
-#include "Tnode.h"
-#include "Eeyore2Tigger.tab.hpp"
+#include "Tir.h"
 
-extern TRoot *root;
-
-int main(int argc, char *argv[]){
+/*int main(int argc, char *argv[]){
     freopen(argv[3], "r", stdin);
     Tigger = fopen(argv[5], "w");
     zzparse();
     root->generate_ir();
     fclose(Tigger);
-    /*Tigger = stdout;
-    zzparse();
-    root->generate_ir();*/
-}
+}*/
