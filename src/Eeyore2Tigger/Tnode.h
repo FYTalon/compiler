@@ -111,6 +111,8 @@ public:
     virtual void generate_ir(){
         clear();
         string reg = length != -1 ? get_arr_reg(v->get_name(), length) : get_var_reg(v->get_name());
+        inits += TContext;
+        TContext.clear();
         inits += reg + " = " + to_string(val) + "\n";
         save();
         inits += TContext;

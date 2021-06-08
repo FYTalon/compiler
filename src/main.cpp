@@ -4,7 +4,7 @@
 extern FILE *zzin, *yyin;
 
 int main(int argc, char *argv[]){
-    /*yyin = fopen(argv[3], "r");
+    yyin = fopen(argv[3], "r");
     Eeyore = fopen("m.eeyore", "w");
     yyparse();
     root->generate_ir();
@@ -15,11 +15,11 @@ int main(int argc, char *argv[]){
     zzparse();
     Troot->generate_ir();
     fclose(Tigger);
-    fclose(zzin);*/
-    zzin = fopen(argv[3], "r");
+    fclose(zzin);
+    /*zzin = fopen(argv[3], "r");
     Tigger = fopen(argv[5], "w");
     zzparse();
     Troot->generate_ir();
     fclose(Tigger);
-    fclose(zzin);
+    fclose(zzin);*/
 }
