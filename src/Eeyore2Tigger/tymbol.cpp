@@ -95,15 +95,14 @@ void melloc_reg(string *name){
     clear_reg(p);
     R2V[regs[p]] = *name;
     V2R[*name] = regs[p];
-    TContext += (string)"load " + (*name) + " " + regs[p] + "\n";
+    if(!arr[*name])
+        TContext += (string)"load " + (*name) + " " + regs[p] + "\n";
+    else 
+        TContext += (string)"loadaddr " + (*name) + " " + regs[p] + "\n";
 }
 
 string get_var_reg(string *name){
     string var = get_var(name);
-    if(arr[*name]){
-        TContext += (string)"loadaddr " + var + " " + "s0\n";
-        return "s0";
-    }
     melloc_reg(&var);
     return V2R[var];
 }
