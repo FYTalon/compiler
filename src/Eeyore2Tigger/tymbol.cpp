@@ -63,6 +63,7 @@ string get_var(string *name){
 }
 
 void clear_reg(string reg){
+    if(!R2V.count(reg)) return ;
     string pre = R2V[reg];
     if(pre.find("v") == pre.npos)
         TContext += (string)"store " + reg + " " + pre + "\n";
