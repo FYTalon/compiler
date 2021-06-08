@@ -79,7 +79,7 @@ void melloc_reg(string *name){
     if(V2R.count(*name)) return ;
     int p;
     for(p = 1; p < reg_num; p++)
-        if(!R2V.count(regs[p])) break;
+        if(!R2V.count(regs[p]) && !ban[regs[p]]) break;
     if(p == reg_num){
         p = rand() % (reg_num - 1) + 1;
         while(ban[regs[p]])
@@ -122,7 +122,7 @@ string get_arr_reg(string *name, int len){
     //if(V2R.count(str)) return V2R[str];
     int p;
     for(p = 1; p < reg_num; p++)
-        if(!R2V.count(regs[p])) break;
+        if(!R2V.count(regs[p]) && !ban[regs[p]]) break;
     if(p == reg_num){
         p = rand() % (reg_num - 1) + 1;
         while(ban[regs[p]])
