@@ -145,7 +145,7 @@ public:
         TContext.clear();
         enter_block(p);
         body->generate_ir();
-        fprintf(Tigger, "%s [%d] [%d]\n", ident->c_str(), p, p + get_max());
+        fprintf(Tigger, "%s [%d] [%d]\n", ident->c_str(), p, get_max());
         if(*ident == "f_main") fprintf(Tigger, "%s", inits.c_str());
         fprintf(Tigger, "%s", TContext.c_str());
         fprintf(Tigger, "end %s\n", ident->c_str());

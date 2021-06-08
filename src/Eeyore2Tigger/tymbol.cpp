@@ -62,19 +62,6 @@ string get_var(string *name){
     else return "";
 }
 
-void clear_reg(int p){
-    if(!R2V.count(regs[p])) return ;
-    string pre = R2V[regs[p]];
-    if(pre.find("v") == pre.npos)
-        TContext += (string)"store " + regs[p] + " " + pre + "\n";
-    else {
-        TContext += (string)"loadaddr " + pre + " " + "s0\n";
-        TContext += (string)"s0[0] = " + regs[p] + "\n" ;
-    }
-    R2V.erase(regs[p]);
-    V2R.erase(pre);
-}
-
 void clear_reg(string reg){
     string pre = R2V[reg];
     if(pre.find("v") == pre.npos)
@@ -89,10 +76,15 @@ void clear_reg(string reg){
 
 void melloc_reg(string *name){
     if(V2R.count(*name)) return ;
-    int p = rand() % (reg_num - 1) + 1;
-    while(ban[regs[p]])
+    int p;
+    for(p = 1; p < reg_num; p++)
+        if(!R2V.count(regs[p])) break;
+    if(p == reg_num){
         p = rand() % (reg_num - 1) + 1;
-    clear_reg(p);
+        while(ban[regs[p]])
+            p = rand() % (reg_num - 1) + 1;
+        clear_reg(regs[p]);    
+    }
     R2V[regs[p]] = *name;
     V2R[*name] = regs[p];
     TContext += (string)"load " + (*name) + " " + regs[p] + "\n";
@@ -127,8 +119,16 @@ string get_arr_reg(string *name, string *len){
 string get_arr_reg(string *name, int len){
     string var = get_var(name);
     //if(V2R.count(str)) return V2R[str];
-    int p = rand() % (reg_num - 1) + 1;
-    clear_reg(p);
+    int p;
+    for(p = 1; p < reg_num; p++)
+        if(!R2V.count(regs[p])) break;
+    if(p == reg_num){
+        p = rand() % (reg_num - 1) + 1;
+        while(ban[regs[p]])
+            p = rand() % (reg_num - 1) + 1;
+        clear_reg(regs[p]);
+    }
+    
     string reg = regs[p];
     if(name->find("p") == name->npos){
         TContext += (string)"loadaddr " + var + " s0\n";
@@ -145,7 +145,7 @@ string get_arr_reg(string *name, int len){
 
 void save(){
     for(int i = 1; i < reg_num; i++)
-        clear_reg(i);
+        clear_reg(regs[i]);
 }
 
 void clear(){
