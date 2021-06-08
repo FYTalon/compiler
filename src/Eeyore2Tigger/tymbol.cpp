@@ -80,7 +80,7 @@ void clear_reg(string reg){
     if(pre.find("v") == pre.npos)
         TContext += (string)"store " + reg + " " + pre + "\n";
     else {
-        TContext += (string)"loadaddr " + pre + " " + "s0\n";
+        TContext += (string)"loadaddr " + pre + " s0\n";
         TContext += (string)"s0[0] = " + reg + "\n" ;
     }
     R2V.erase(reg);
@@ -96,13 +96,12 @@ void melloc_reg(string *name){
     R2V[regs[p]] = *name;
     V2R[*name] = regs[p];
     TContext += (string)"load " + (*name) + " " + regs[p] + "\n";
-        
 }
 
 string get_var_reg(string *name){
     string var = get_var(name);
     if(arr[*name]){
-        TContext += (string)"loadaddr " + (*name) + " s0\n";
+        TContext += (string)"loadaddr " + var + " s0\n";
         return "s0";
     }
     melloc_reg(&var);
