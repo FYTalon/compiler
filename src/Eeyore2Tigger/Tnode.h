@@ -298,8 +298,8 @@ public:
     virtual void generate_ir(){
         save();
         TContext += (string)"call " + (*ident) + "\n";
+        clear();
         if(v != NULL){
-            clear();
             string reg = get_var_reg(v->get_name());
             TContext += reg + " = a0\n";
         }
