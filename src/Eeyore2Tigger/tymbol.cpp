@@ -87,7 +87,7 @@ void clear_reg(string reg){
     V2R.erase(pre);
 }
 
-void melloc_reg(string *name, bool flag){
+void melloc_reg(string *name){
     if(V2R.count(*name)) return ;
     int p = rand() % (reg_num - 1) + 1;
     while(ban[regs[p]])
@@ -95,22 +95,24 @@ void melloc_reg(string *name, bool flag){
     clear_reg(p);
     R2V[regs[p]] = *name;
     V2R[*name] = regs[p];
-    if(!flag)
-        TContext += (string)"load " + (*name) + " " + regs[p] + "\n";
-    else 
-        TContext += (string)"loadaddr " + (*name) + " " + regs[p] + "\n";
+    TContext += (string)"load " + (*name) + " " + regs[p] + "\n";
+        
 }
 
 string get_var_reg(string *name){
     string var = get_var(name);
-    melloc_reg(&var, arr[*name]);
+    if(arr[*name]){
+        TContext += (string)"loadaddr " + (*name) + " s0\n";
+        return "s0";
+    }
+    melloc_reg(&var);
     return V2R[var];
 }
 
 string get_arr_reg(string *name, string *len){
     string var = get_var(name);
     string var_len = get_var(len);
-    melloc_reg(&var_len, false);
+    melloc_reg(&var_len);
     string reg = V2R[var_len];
     clear_reg(reg);
     if(name->find("p") == name->npos){
