@@ -16,4 +16,10 @@ int main(int argc, char *argv[]){
     Troot->generate_ir();
     fclose(Tigger);
     fclose(zzin);
+    /*zzin = fopen(argv[3], "r");
+    Tigger = fopen(argv[5], "w");
+    zzparse();
+    Troot->generate_ir();
+    fclose(Tigger);
+    fclose(zzin);*/
 }

@@ -111,10 +111,16 @@ public:
     virtual void generate_ir(){
         clear();
         string reg = length != -1 ? get_arr_reg(v->get_name(), length) : get_var_reg(v->get_name());
-        inits += reg + " = " + to_string(val) + "\n";
-        save();
-        inits += TContext;
-        TContext.clear();
+        if(!inblock){
+            inits += reg + " = " + to_string(val) + "\n";
+            save();
+            inits += TContext;
+            TContext.clear();
+        }
+        else {
+            TContext += reg + " = " + to_string(val) + "\n";
+            save();
+        }
     }
 };
 
@@ -163,7 +169,7 @@ public:
         string r = Rval->opt();
         TContext += reg + " = " + r + "\n";
         ban.clear();
-        //save();
+        save();
     }
 };
 
@@ -184,7 +190,7 @@ public:
         string r = rval->opt();
         TContext += reg + " = " + l + " " + (*op) + " " + r + "\n";
         ban.clear();
-        //save();
+        save();
     }
 };
 
@@ -200,7 +206,7 @@ public:
         string r = Rval->obt();
         TContext += reg + " = " + (*op) + r + "\n";
         ban.clear();
-        //save();
+        save();
     }
 };
 
@@ -218,7 +224,7 @@ public:
         ban[reg] = true;
         TContext += reg + "[0] = " + Rval->obt() + "\n";
         ban.clear();
-        //save();
+        save();
     }
 };
 
@@ -243,7 +249,7 @@ public:
         ban[reg] = true;
         TContext += get_var_reg(v->get_name()) + " = " + reg + "[0]\n";
         ban.clear();
-        //save();
+        save();
     }
 };
 
