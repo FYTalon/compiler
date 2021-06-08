@@ -14,6 +14,11 @@ const int reg_num = 19;
 void enter_block(int p){
     inblock = true;
     num = curp = p;
+    for(int i = 0; i < num; i++){
+        string str = "p" + to_string(i);
+        E2V[str] = to_string(i);
+        TContext += "store a" + to_string(i) + " " + to_string(i) + "\n";
+    }
 }
 
 void exit_block(){
@@ -94,11 +99,6 @@ void melloc_reg(string *name){
 }
 
 string get_var_reg(string *name){
-    if(name->find("p") != name->npos){
-        replace(name->begin(), name->end(), 'p', 'a');
-        return *name;
-    }
-
     string var = get_var(name);
     if(arr[*name]){
         TContext += (string)"loadaddr " + var + " " + "s0\n";
@@ -110,43 +110,34 @@ string get_var_reg(string *name){
 
 string get_arr_reg(string *name, string *len){
     string var = get_var(name);
-    bool flag = true;
-    if(name->find("p") != name->npos){
-        replace(name->begin(), name->end(), 'p', 'a');
-        var = *name;
-        flag = false;
-    }
     string var_len = get_var(len);
     melloc_reg(&var_len);
     string reg = V2R[var_len];
     clear_reg(reg);
-    if(flag){
+    if(name->find("p") == name->npos){
         TContext += (string)"loadaddr " + var + " s0\n";
     }
-    if(flag) TContext += reg + " = " + reg + " + s0\n";
-    else TContext += reg + " = " + reg + " + " + var + "\n";
+    else {
+        TContext += (string)"load " + var + " s0\n";
+    }
+    TContext += reg + " = " + reg + " + s0\n";
     return reg;
 }
 
 string get_arr_reg(string *name, int len){
     string var = get_var(name);
-    bool flag = true;
-    if(name->find("p") != name->npos){
-        replace(name->begin(), name->end(), 'p', 'a');
-        var = *name;
-        flag = false;
-    }
     //if(V2R.count(str)) return V2R[str];
     int p = rand() % (reg_num - 1) + 1;
     clear_reg(p);
     string reg = regs[p];
-    if(flag){
+    if(name->find("p") == name->npos){
         TContext += (string)"loadaddr " + var + " s0\n";
-        TContext += (string)"s0 = s0 + " + to_string(len) + "\n";
     }
     else {
-        TContext += (string)"s0 = " + var + " + " + to_string(len) + "\n";
+        TContext += (string)"load " + var + " s0\n";
     }
+    
+    TContext += (string)"s0 = s0 + " + to_string(len) + "\n";
     
     TContext += reg + " = s0\n";
     return reg;

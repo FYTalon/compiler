@@ -122,8 +122,10 @@ class TBlock : public TNode{
 public:
     vector<TStatement*>list;
     virtual void generate_ir(){
+        clear();
         for(auto i : list)
             i->generate_ir();
+        save();
     }
 };
 
@@ -140,7 +142,6 @@ public:
     virtual void generate_ir(){
         TContext.clear();
         enter_block(p);
-        clear();
         body->generate_ir();
         fprintf(Tigger, "%s [%d] [%d]\n", ident->c_str(), p, p + get_max());
         if(*ident == "f_main") fprintf(Tigger, "%s", inits.c_str());
@@ -156,11 +157,12 @@ public:
     TValue *Rval;
     TExpression(TVar* var = NULL, TValue* Rv = NULL) : v(var), Rval(Rv){}
     virtual void generate_ir(){
-        ban.clear();
+        
         string reg = get_var_reg(v->get_name());
         ban[reg] = true;
         string r = Rval->opt();
         TContext += reg + " = " + r + "\n";
+        ban.clear();
         //save();
     }
 };
@@ -175,13 +177,13 @@ public:
         rval = rv;
     }
     virtual void generate_ir(){
-        ban.clear();
         string reg = get_var_reg(v->get_name());
         ban[reg] = true;
         string l = lval->obt();
         ban[l] = true;
         string r = rval->opt();
         TContext += reg + " = " + l + " " + (*op) + " " + r + "\n";
+        ban.clear();
         //save();
     }
 };
@@ -193,11 +195,11 @@ public:
         op = Op;
     }
     virtual void generate_ir(){
-        ban.clear();
         string reg = get_var_reg(v->get_name());
         ban[reg] = true;
         string r = Rval->obt();
         TContext += reg + " = " + (*op) + r + "\n";
+        ban.clear();
         //save();
     }
 };
@@ -210,12 +212,12 @@ public:
     }
     virtual void generate_ir(){
         string reg;
-        ban.clear();
         if(num->v != NULL)
             reg = get_arr_reg(v->get_name(), num->v->get_name());
         else reg = get_arr_reg(v->get_name(), num->val);
         ban[reg] = true;
         TContext += reg + "[0] = " + Rval->obt() + "\n";
+        ban.clear();
         //save();
     }
 };
@@ -230,7 +232,7 @@ public:
     }
     virtual void generate_ir(){
         string reg;
-        ban.clear();
+        
         if(num->v != NULL){
             reg = get_arr_reg(rhs->get_name(), num->v->get_name());
             //printf("%s\n", num->v->get_name()->c_str());
@@ -240,6 +242,7 @@ public:
         
         ban[reg] = true;
         TContext += get_var_reg(v->get_name()) + " = " + reg + "[0]\n";
+        ban.clear();
         //save();
     }
 };
@@ -255,12 +258,12 @@ public:
         save();
         if(op != NULL){
             string str = lv->obt();
-            ban.clear();
             ban[str] = true;
             TContext += (string)"if " + str + " " + (*op) + " " + rv->obt() + " ";
         
         }
         TContext += (string)"goto " + (*l->get_name()) + "\n";
+        ban.clear();
         clear();
     }
 };
@@ -282,7 +285,6 @@ public:
     TParam(TValue* v) : val(v) {}
     virtual void generate_ir(){
         int id = pnum++;
-        if(id < curp) TContext += "store a" + to_string(id) + " " + to_string(id) + "\n";
         TContext += "a" + to_string(id) + " = " + val->obt() + "\n";
     }
 };
@@ -299,8 +301,6 @@ public:
             string reg = get_var_reg(v->get_name());
             TContext += reg + " = a0\n";
         }
-        for(int i = 0; i < curp; i++)
-            TContext += "load " + to_string(i) + " a" + to_string(i) + "\n";
         pnum = 0;
     }
 };
@@ -315,6 +315,7 @@ public:
             TContext += (string)"a0 = " + val->opt() + "\n";
         }
         TContext += "return\n";
+        clear();
     }
 };
 
