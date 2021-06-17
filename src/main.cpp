@@ -6,7 +6,7 @@ extern FILE *zzin, *yyin, *rrin;
 FILE* RISCV;
 
 int main(int argc, char *argv[]){
-    /*yyin = fopen(argv[3], "r");
+    yyin = fopen(argv[3], "r");
     Eeyore = fopen("m.eeyore", "w");
     yyparse();
     root->generate_ir();
@@ -17,7 +17,7 @@ int main(int argc, char *argv[]){
     zzparse();
     Troot->generate_ir();
     fclose(Tigger);
-    fclose(zzin);*/
+    fclose(zzin);
 
     /*zzin = fopen(argv[3], "r");
     Tigger = fopen(argv[5], "w");
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){
     rrparse();
     fclose(rrin);*/
 
-    zzin = fopen(argv[2], "r");
+    /*zzin = fopen(argv[2], "r");
     Tigger = fopen("m.tigger", "w");
     zzparse();
     Troot->generate_ir();
@@ -40,5 +40,5 @@ int main(int argc, char *argv[]){
     rrin = fopen("m.tigger", "r");
     RISCV = fopen(argv[4], "w");
     rrparse();
-    fclose(rrin);
+    fclose(rrin);*/
 }
