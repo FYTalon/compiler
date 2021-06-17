@@ -13,7 +13,7 @@ int main(int argc, char *argv[]){
     fclose(Eeyore);
     fclose(yyin);
     zzin = fopen("m.eeyore", "r");
-    Tigger = fopen(argv[5], "w");
+    Tigger = fopen("m.tigger", "w");
     zzparse();
     Troot->generate_ir();
     fclose(Tigger);
@@ -37,8 +37,8 @@ int main(int argc, char *argv[]){
     Troot->generate_ir();
     fclose(Tigger);
     fclose(zzin);*/
-    /*rrin = fopen("m.tigger", "r");
+    rrin = fopen("m.tigger", "r");
     RISCV = fopen(argv[5], "w");
     rrparse();
-    fclose(rrin);*/
+    fclose(rrin);
 }
