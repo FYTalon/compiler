@@ -218,14 +218,15 @@ Expression: TREG TASSIGN TREG BinOp TREG {
           }
           | TREG TASSIGN OP TREG {
               
-                  if(*$3 ==  "-")
+                  if(*$3 ==  "-"){
                     $$ = new string("");
                     *$$ += "neg " + *$1 + ", " + *$4 + "\n";
+                  }
                     
-                  if(*$3 ==  "!")
+                  if(*$3 ==  "!"){
                     $$ = new string("");
                     *$$ += "seqz " + *$1 + ", " + *$4 + "\n";
-                    
+                  }
               
           }
           | TREG TASSIGN TREG {
