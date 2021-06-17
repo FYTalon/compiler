@@ -36,6 +36,7 @@ using namespace std;
 "a"[0-9]+               SAVE; return TREG;
 "t"[0-9]+               SAVE; return TREG;
 "l"[0-9]+               SAVE; return TLABEL;
+"x0"                    SAVE; return TREG;
 
 [0-9]+                  SAVE; return TINTEGER;
 "-"[0-9]+               SAVE; return TINTEGER;
