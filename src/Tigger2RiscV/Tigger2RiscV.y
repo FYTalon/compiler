@@ -163,9 +163,9 @@ FunctionDef: TFUNCIDENT TLSQUARE TINTEGER TRSQUARE TLSQUARE TINTEGER TRSQUARE Ex
                 *$$ += s;
 
                 while($$->find("_STK_") != $$->npos)
-                    *$$ = $$->replace($$->find("_STK_"), 3, to_string(STK));
+                    *$$ = $$->replace($$->find("_STK_"), 5, to_string(STK));
                 while($$->find("_FTK_") != $$->npos)
-                    *$$ = $$->replace($$->find("_FTK_"), 3, to_string(STK - 4));
+                    *$$ = $$->replace($$->find("_FTK_"), 5, to_string(STK - 4));
             }
            ;
 
