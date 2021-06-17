@@ -310,7 +310,8 @@ Expression: TREG TASSIGN TREG BinOp TREG {
               if(x >= -2048 && x < 2048)
                 *$$ += "sw " + *$2 + ", " + to_string(x) + "(sp)\n";
               else {
-                  *$$ += "li s0, " + *$3 + "\n";
+                  int x = stoi(*$3) * 4;
+                  *$$ += "li s0, " + to_string(x) + "\n";
                   *$$ += "add s0, s0, sp\n";
                   *$$ += "sw " + *$2 + ", 0(s0)\n";
               }
@@ -321,7 +322,8 @@ Expression: TREG TASSIGN TREG BinOp TREG {
               if(x >= -2048 && x < 2048)
                 *$$ += "lw " + *$3 + ", " + to_string(x) + "(sp)\n";
               else {
-                  *$$ += "li s0, " + *$2 + "\n";
+                  int x = stoi(*$3) * 4;
+                  *$$ += "li s0, " + to_string(x) + "\n";
                   *$$ += "add s0, s0, sp\n";
                   *$$ += "lw " + *$3 + ", 0(s0)\n";
               }
@@ -337,7 +339,7 @@ Expression: TREG TASSIGN TREG BinOp TREG {
               if(x >= -2048 && x < 2048)
                 *$$ += "addi " + *$3 + ", sp, " + to_string(x) + "\n";
               else {
-                  *$$ += "li s0, " + *$2 + "\n";
+                  *$$ += "li s0, " + to_string(x) + "\n";
                   *$$ += "add " + *$3 + ", sp, s0\n";
               }
           }
