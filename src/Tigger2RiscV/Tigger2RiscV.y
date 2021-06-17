@@ -146,10 +146,19 @@ FunctionDef: TFUNCIDENT TLSQUARE TINTEGER TRSQUARE TLSQUARE TINTEGER TRSQUARE Ex
                 sprintf(s, "%s:\n", name.c_str());
                 *$$ += s;
                 memset(s, 0, sizeof(s));
-                sprintf(s, "addi sp, sp, -STK\n");
+                sprintf(s, "li s0, -STK\n");
                 *$$ += s;
                 memset(s, 0, sizeof(s));
-                sprintf(s, "sw ra, FTK(sp)\n");
+                sprintf(s, "add sp, sp, s0\n");
+                *$$ += s;
+                memset(s, 0, sizeof(s));
+                sprintf(s, "li s0, FTK\n");
+                *$$ += s;
+                memset(s, 0, sizeof(s));
+                sprintf(s, "add s0, s0, sp\n");
+                *$$ += s;
+                memset(s, 0, sizeof(s));
+                sprintf(s, "sw ra, 0(s0)\n");
                 *$$ += s;
                 *$$ += *$8;
                 memset(s, 0, sizeof(s));
@@ -217,7 +226,7 @@ Expression: TREG TASSIGN TREG BinOp TREG {
                     *$$ += "neg " + *$1 + ", " + *$4 + "\n";
                     
                   if(*$3 ==  "!")
-                    $$ = new string();
+                    $$ = new string("");
                     *$$ += "seqz " + *$1 + ", " + *$4 + "\n";
                     
               
@@ -237,7 +246,8 @@ Expression: TREG TASSIGN TREG BinOp TREG {
                 *$$ += "sw " + *$6 + ", " + *$3 + "(" + *$1 + ")\n";
               else {
                   *$$ += "li s0, " + *$3 + "\n";
-                  *$$ += "sw " + *$6 + ", s0(" + *$1 + ")\n";
+                  *$$ += "add s0, s0, " + *$1 + "\n";
+                  *$$ += "sw " + *$6 + ", 0(s0)\n";
                   
               }
 
@@ -249,7 +259,8 @@ Expression: TREG TASSIGN TREG BinOp TREG {
                 *$$ += "lw " + *$1 + ", " + *$5 + "(" + *$3 + ")\n";
               else {
                   *$$ += "li s0, " + *$5 + "\n";
-                *$$ += "lw " + *$1 + ", s0(" + *$3 + ")\n";
+                  *$$ += "add s0, s0, " + *$3 + "\n";
+                *$$ += "lw " + *$1 + ", 0(s0)\n";
               }
           }
           | TIF TREG LogicOp TREG TGOTO TLABEL {
@@ -291,7 +302,7 @@ Expression: TREG TASSIGN TREG BinOp TREG {
               *$$ += "call " + name + "\n";
           }
           | TRETURN {
-              $$ = new string("lw ra, FTK(sp)\naddi sp, sp, STK\nret\n");
+              $$ = new string("li s0, FTK\nadd s0, s0, sp\nlw ra, 0(s0)\naddi sp, s0, 4\nret\n");
           }
           | TSTORE TREG TINTEGER {
               int x = stoi(*$3) * 4;
@@ -300,7 +311,8 @@ Expression: TREG TASSIGN TREG BinOp TREG {
                 *$$ += "sw " + *$2 + ", " + to_string(x) + "(sp)\n";
               else {
                   *$$ += "li s0, " + *$3 + "\n";
-                  *$$ += "sw " + *$2 + ", s0(sp)\n";
+                  *$$ += "add s0, s0, sp\n";
+                  *$$ += "sw " + *$2 + ", 0(s0)\n";
               }
           }
           | TLOAD TINTEGER TREG {
@@ -310,7 +322,8 @@ Expression: TREG TASSIGN TREG BinOp TREG {
                 *$$ += "lw " + *$3 + ", " + to_string(x) + "(sp)\n";
               else {
                   *$$ += "li s0, " + *$2 + "\n";
-                  *$$ += "lw " + *$3 + ", s0(sp)\n";
+                  *$$ += "add s0, s0, sp\n";
+                  *$$ += "lw " + *$3 + ", 0(s0)\n";
               }
           }
           | TLOAD TVAR TREG {
@@ -325,7 +338,7 @@ Expression: TREG TASSIGN TREG BinOp TREG {
                 *$$ += "addi " + *$3 + ", sp, " + to_string(x) + "\n";
               else {
                   *$$ += "li s0, " + *$2 + "\n";
-                  *$$ += "addi " + *$3 + ", sp, s0\n";
+                  *$$ += "add " + *$3 + ", sp, s0\n";
               }
           }
           | TLOADADDR TVAR TREG {
