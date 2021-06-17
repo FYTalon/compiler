@@ -44,21 +44,21 @@ using namespace std;
 "f_"[a-zA-Z_][a-zA-Z_0-9]*      SAVE; return TFUNCIDENT;
 
 
-"="                     return TASSIGN;
-"=="                    return TEQ;
-"!="                    return TNQ;
-"<"                     return TLT;
-"<="                    return TLQ;
-">"                     return TGT;
-">="                    return TGQ;
-"&&"                    return TAND;
-"||"                    return TOR;
-"!"                     return TNOT;
-"+"                     return TPLUS;
-"-"                     return TMINUS;
-"*"                     return TMUL;
-"/"                     return TDIV;
-"%"                     return TMOD;
+"="                     SAVE; return TASSIGN;
+"=="                    SAVE; return TEQ;
+"!="                    SAVE; return TNQ;
+"<"                     SAVE; return TLT;
+"<="                    SAVE; return TLQ;
+">"                     SAVE; return TGT;
+">="                    SAVE; return TGQ;
+"&&"                    SAVE; return TAND;
+"||"                    SAVE; return TOR;
+"!"                     SAVE; return TNOT;
+"+"                     SAVE; return TPLUS;
+"-"                     SAVE; return TMINUS;
+"*"                     SAVE; return TMUL;
+"/"                     SAVE; return TDIV;
+"%"                     SAVE; return TMOD;
 
 "("                     return TOKEN(TLPAREN);
 ")"                     return TOKEN(TRPAREN);
