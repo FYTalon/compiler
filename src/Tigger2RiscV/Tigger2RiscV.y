@@ -146,29 +146,26 @@ FunctionDef: TFUNCIDENT TLSQUARE TINTEGER TRSQUARE TLSQUARE TINTEGER TRSQUARE Ex
                 sprintf(s, "%s:\n", name.c_str());
                 *$$ += s;
                 memset(s, 0, sizeof(s));
-                sprintf(s, "li s0, -STK\n");
+                sprintf(s, "li s0, _STK_\n");
                 *$$ += s;
                 memset(s, 0, sizeof(s));
-                sprintf(s, "add sp, sp, s0\n");
-                *$$ += s;
-                memset(s, 0, sizeof(s));
-                sprintf(s, "li s0, FTK\n");
+                sprintf(s, "sub sp, sp, s0\n");
                 *$$ += s;
                 memset(s, 0, sizeof(s));
                 sprintf(s, "add s0, s0, sp\n");
                 *$$ += s;
                 memset(s, 0, sizeof(s));
-                sprintf(s, "sw ra, 0(s0)\n");
+                sprintf(s, "sw ra, -4(s0)\n");
                 *$$ += s;
                 *$$ += *$8;
                 memset(s, 0, sizeof(s));
                 sprintf(s, "  .size   %s, .-%s\n", name.c_str(), name.c_str());
                 *$$ += s;
 
-                while($$->find("STK") != $$->npos)
-                    *$$ = $$->replace($$->find("STK"), 3, to_string(STK));
-                while($$->find("FTK") != $$->npos)
-                    *$$ = $$->replace($$->find("FTK"), 3, to_string(STK - 4));
+                while($$->find("_STK_") != $$->npos)
+                    *$$ = $$->replace($$->find("_STK_"), 3, to_string(STK));
+                while($$->find("_FTK_") != $$->npos)
+                    *$$ = $$->replace($$->find("_FTK_"), 3, to_string(STK - 4));
             }
            ;
 
@@ -191,31 +188,31 @@ Expression: TREG TASSIGN TREG BinOp TREG {
                 char s[100];
                 memset(s, 0, sizeof(s));
                 
-                    if(*$4 == "+"){
-                        int x = stoi(*$5);
-                        if(x >= -2048 && x < 2048)
-                            sprintf(s, "addi %s, %s, %s\n", $1->c_str(), $3->c_str(), $5->c_str());
-                        else {
-                            *$$ += "li s0, " + *$5 + "\n";
-                            solve(s, *$1, *$3, "s0", "+");
-                        }
-                    }
-                        
-                    else if(*$4 == "<"){
-                        int x = stoi(*$5);
-                        if(x >= -2048 && x < 2048)
-                            sprintf(s, "slti %s, %s, %s\n", $1->c_str(), $3->c_str(), $5->c_str());
-                        else {
-                            *$$ += "li s0, " + *$5 + "\n";
-                            solve(s, *$1, *$3, "s0", "<");
-                        }
-                    }
-                        
+                if(*$4 == "+"){
+                    int x = stoi(*$5);
+                    if(x >= -2048 && x < 2048)
+                        sprintf(s, "addi %s, %s, %s\n", $1->c_str(), $3->c_str(), $5->c_str());
                     else {
                         *$$ += "li s0, " + *$5 + "\n";
-                        solve(s, *$1, *$3, "s0", *$4);
-                        
+                        *$$ += "add " + *$1 + ", " + *$3 + ", s0\n";
                     }
+                }
+                    
+                else if(*$4 == "<"){
+                    int x = stoi(*$5);
+                    if(x >= -2048 && x < 2048)
+                        sprintf(s, "slti %s, %s, %s\n", $1->c_str(), $3->c_str(), $5->c_str());
+                    else {
+                        *$$ += "li s0, " + *$5 + "\n";
+                        *$$ += "slt " + *$1 + ", " + *$3 + ", s0\n";
+                    }
+                }
+                    
+                else {
+                    *$$ += "li s0, " + *$5 + "\n";
+                    solve(s, *$1, *$3, "s0", *$4);
+                    
+                }
                 
                 *$$ += s;
           }
@@ -302,7 +299,7 @@ Expression: TREG TASSIGN TREG BinOp TREG {
               *$$ += "call " + name + "\n";
           }
           | TRETURN {
-              $$ = new string("li s0, FTK\nadd s0, s0, sp\nlw ra, 0(s0)\naddi sp, s0, 4\nret\n");
+              $$ = new string("li s0, _FTK_\nadd s0, s0, sp\nlw ra, 0(s0)\naddi sp, s0, 4\nret\n");
           }
           | TSTORE TREG TINTEGER {
               int x = stoi(*$3) * 4;
