@@ -69,8 +69,8 @@ public:
     string obt(){
         if(v != NULL) return get_var_reg(v->get_name());
         else {
-            TContext += "s0 = " + to_string(val) + "\n";
-            return "s0";
+            TContext += "t0 = " + to_string(val) + "\n";
+            return "t0";
         }
     }
 };
@@ -109,6 +109,7 @@ public:
         val = atoi(w->c_str());
     }
     virtual void generate_ir(){
+        if(!val) return ;
         clear();
         string reg = length != -1 ? get_arr_reg(v->get_name(), length) : get_var_reg(v->get_name());
         inits += TContext;

@@ -36,9 +36,9 @@ int main(int argc, char *argv[]){
     zzparse();
     Troot->generate_ir();
     fclose(Tigger);
-    fclose(zzin);
-    rrin = fopen("m.tigger", "r");
-    RISCV = fopen(argv[4], "w");
+    fclose(zzin);*/
+    /*rrin = fopen("m.tigger", "r");
+    RISCV = fopen(argv[5], "w");
     rrparse();
     fclose(rrin);*/
 }
