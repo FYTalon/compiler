@@ -322,7 +322,7 @@ Expression: TREG TASSIGN TREG BinOp TREG {
               if(x >= -2048 && x < 2048)
                 *$$ += "lw " + *$3 + ", " + to_string(x) + "(sp)\n";
               else {
-                  int x = stoi(*$3) * 4;
+                  int x = stoi(*$2) * 4;
                   *$$ += "li s0, " + to_string(x) + "\n";
                   *$$ += "add s0, s0, sp\n";
                   *$$ += "lw " + *$3 + ", 0(s0)\n";
