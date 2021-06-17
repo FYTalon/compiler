@@ -41,4 +41,5 @@ int main(int argc, char *argv[]){
     RISCV = fopen(argv[4], "w");
     rrparse();
     fclose(rrin);
+    fclose(RISCV);
 }
