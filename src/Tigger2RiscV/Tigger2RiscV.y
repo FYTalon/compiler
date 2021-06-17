@@ -137,7 +137,7 @@ FunctionDef: TFUNCIDENT TLSQUARE TINTEGER TRSQUARE TLSQUARE TINTEGER TRSQUARE Ex
                 sprintf(s, "  .align  2\n");
                 *$$ += s;
                 memset(s, 0, sizeof(s));
-                sprintf(s, "  .global %s", name.c_str());
+                sprintf(s, "  .global %s\n", name.c_str());
                 *$$ += s;
                 memset(s, 0, sizeof(s));
                 sprintf(s, "  .type   %s, @function\n", name.c_str());
@@ -182,11 +182,25 @@ Expression: TREG TASSIGN TREG BinOp TREG {
                 char s[100];
                 memset(s, 0, sizeof(s));
                 
-                    if(*$4 == "+")
-                        sprintf(s, "addi %s, %s, %s\n", $1->c_str(), $3->c_str(), $5->c_str());
+                    if(*$4 == "+"){
+                        int x = stoi(*$5);
+                        if(x >= -2048 && x < 2048)
+                            sprintf(s, "addi %s, %s, %s\n", $1->c_str(), $3->c_str(), $5->c_str());
+                        else {
+                            *$$ += "li s0, " + *$5 + "\n";
+                            solve(s, *$1, *$3, "s0", "+");
+                        }
+                    }
                         
-                    else if(*$4 == "<")
-                        sprintf(s, "slti %s, %s, %s\n", $1->c_str(), $3->c_str(), $5->c_str());
+                    else if(*$4 == "<"){
+                        int x = stoi(*$5);
+                        if(x >= -2048 && x < 2048)
+                            sprintf(s, "slti %s, %s, %s\n", $1->c_str(), $3->c_str(), $5->c_str());
+                        else {
+                            *$$ += "li s0, " + *$5 + "\n";
+                            solve(s, *$1, *$3, "s0", "<");
+                        }
+                    }
                         
                     else {
                         *$$ += "li s0, " + *$5 + "\n";
@@ -217,12 +231,26 @@ Expression: TREG TASSIGN TREG BinOp TREG {
               *$$ += "li " + *$1 + ", " + *$3 + "\n";
           }
           | TREG TLSQUARE TINTEGER TRSQUARE TASSIGN TREG {
+              int x = stoi(*$3);
               $$ = new string("");
-              *$$ += "sw " + *$6 + ", " + *$3 + "(" + *$1 + ")\n";
+              if(x >= -2048 && x < 2048)
+                *$$ += "sw " + *$6 + ", " + *$3 + "(" + *$1 + ")\n";
+              else {
+                  *$$ += "li s0, " + *$3 + "\n";
+                  *$$ += "sw " + *$6 + ", s0(" + *$1 + ")\n";
+                  
+              }
+
           }
           | TREG TASSIGN TREG TLSQUARE TINTEGER TRSQUARE {
+              int x = stoi(*$5);
               $$ = new string("");
-              *$$ += "lw " + *$1 + ", " + *$5 + "(" + *$3 + ")\n";
+              if(x >= -2048 && x < 2048)
+                *$$ += "lw " + *$1 + ", " + *$5 + "(" + *$3 + ")\n";
+              else {
+                  *$$ += "li s0, " + *$5 + "\n";
+                *$$ += "lw " + *$1 + ", s0(" + *$3 + ")\n";
+              }
           }
           | TIF TREG LogicOp TREG TGOTO TLABEL {
               char s[100];
@@ -255,7 +283,7 @@ Expression: TREG TASSIGN TREG BinOp TREG {
           }
           | TLABEL TCOLON {
               $$ = new string("");
-              *$$ += "." + *$1 + "\n";
+              *$$ += "." + *$1 + ":\n";
           }
           | TCALL TFUNCIDENT {
               string name = $2->substr(2);
@@ -268,12 +296,22 @@ Expression: TREG TASSIGN TREG BinOp TREG {
           | TSTORE TREG TINTEGER {
               int x = stoi(*$3) * 4;
               $$ = new string("");
-              *$$ += "sw " + *$2 + ", " + to_string(x) + "(sp)\n";
+              if(x >= -2048 && x < 2048)
+                *$$ += "sw " + *$2 + ", " + to_string(x) + "(sp)\n";
+              else {
+                  *$$ += "li s0, " + *$3 + "\n";
+                  *$$ += "sw " + *$2 + ", s0(sp)\n";
+              }
           }
           | TLOAD TINTEGER TREG {
               int x = stoi(*$2) * 4;
               $$ = new string("");
-              *$$ += "lw " + *$3 + ", " + to_string(x) + "(sp)\n";
+              if(x >= -2048 && x < 2048)
+                *$$ += "lw " + *$3 + ", " + to_string(x) + "(sp)\n";
+              else {
+                  *$$ += "li s0, " + *$2 + "\n";
+                  *$$ += "lw " + *$3 + ", s0(sp)\n";
+              }
           }
           | TLOAD TVAR TREG {
               $$ = new string("");
@@ -283,11 +321,16 @@ Expression: TREG TASSIGN TREG BinOp TREG {
           | TLOADADDR TINTEGER TREG {
               int x = stoi(*$2) * 4;
               $$ = new string("");
-              *$$ += "addi " + *$3 + ", sp, " + to_string(x) + "\n";
+              if(x >= -2048 && x < 2048)
+                *$$ += "addi " + *$3 + ", sp, " + to_string(x) + "\n";
+              else {
+                  *$$ += "li s0, " + *$2 + "\n";
+                  *$$ += "addi " + *$3 + ", sp, s0\n";
+              }
           }
           | TLOADADDR TVAR TREG {
               $$ = new string("");
-              *$$ += "la " + *$3 + ", " + *$2;
+              *$$ += "la " + *$3 + ", " + *$2 + "\n";
           }
           ;
 
