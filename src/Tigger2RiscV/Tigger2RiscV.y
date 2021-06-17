@@ -38,13 +38,13 @@ void solve(char *s, string r1, string r2, string r3, string op){
             sprintf(s, "sgt %s, %s, %s\n", r1.c_str(), r2.c_str(), r3.c_str());
             
         if(op == "<=")
-            sprintf(s, "slt %s, %s, %s\nseqz %s, %s\n", r1.c_str(), r2.c_str(), r3.c_str(), r1.c_str(), r1.c_str());
-            
-        if(op == ">=")
             sprintf(s, "sgt %s, %s, %s\nseqz %s, %s\n", r1.c_str(), r2.c_str(), r3.c_str(), r1.c_str(), r1.c_str());
             
+        if(op == ">=")
+            sprintf(s, "slt %s, %s, %s\nseqz %s, %s\n", r1.c_str(), r2.c_str(), r3.c_str(), r1.c_str(), r1.c_str());
+            
         if(op == "&&")
-            sprintf(s, "snez %s, %s\nsnez s0, %s\nand %s, %s, s0\n", r1.c_str(), r2.c_str(), r3.c_str(), r1.c_str(), r1.c_str());
+            sprintf(s, "snez %s, %s         \nsnez s0, %s\nand %s, %s, s0\n", r1.c_str(), r2.c_str(), r3.c_str(), r1.c_str(), r1.c_str());
             
         if(op == "||")
             sprintf(s, "or %s, %s, %s\nsnez %s, %s\n", r1.c_str(), r2.c_str(), r3.c_str(), r1.c_str(), r1.c_str());
