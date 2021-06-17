@@ -28,7 +28,7 @@ void zzerror(const char *s){ printf("Error:%s\natline: %d: \n", s, zzget_lineno(
     TValue* value;
 }
 
-%token <str> EFUNCIDENT EINTEGER;
+%token <str> EFUNCIDENT EINTEGER
 %token <var> EVAR ELABEL
 %token <token> EEND ECALL EPARAM EIF EGOTO ERETURN EVARDEF
 %token <str> EASSIGN EEQ ENQ ELT ELQ EGT EGQ EAND EOR ENOT EPLUS EMINUS EMUL EDIV EMOD
