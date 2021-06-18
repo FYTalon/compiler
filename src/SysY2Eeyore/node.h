@@ -264,42 +264,35 @@ public:
 
     void initial(NArrayInitVal* val, vector<int>&shape, int id, int &pos, int deep){
         if(val->end){
-            int plus = pos + shape[deep];
-            //printf("%d\n", pos);
-            while(pos < plus){
-                Symbol* tmp = new Symbol(0, 0, ' ');
-                if(val->val != NULL) tmp = val->val->generate_ir();
-                char s[100];
-                if(cst){
-                    memset(s, 0, sizeof(s));
-                    sprintf(s, "T%d[%d]", id, pos * 4);
-                    string str = s;
-                    insert(&str, 0, tmp->memloc, tmp->type);
-                }
+            Symbol* tmp = new Symbol(0, 0, ' ');
+            if(val->val != NULL) tmp = val->val->generate_ir();
+            char s[100];
+            if(cst){
                 memset(s, 0, sizeof(s));
-                sprintf(s, "T%d[%d] = %c%d\n", id, pos * 4, tmp->type, tmp->memloc);
-                Context += s;
-                pos++;
-                if(val->val != NULL) return ;
+                sprintf(s, "T%d[%d]", id, pos * 4);
+                string str = s;
+                insert(&str, 0, tmp->memloc, tmp->type);
             }
+            memset(s, 0, sizeof(s));
+            sprintf(s, "T%d[%d] = %c%d\n", id, pos * 4, tmp->type, tmp->memloc);
+            Context += s;
+            pos++;
             return ;
         }
         int plus = pos + shape[deep];
         for(NArrayInitVal* v : val->value){
             initial(v, shape, id, pos, deep + 1);
         }
-        if(cst){
-            while(pos < plus){
-                char s[100];
-                memset(s, 0, sizeof(s));
-                sprintf(s, "T%d[%d] = %c%d\n", id, pos * 4, ' ', 0);
-                Context += s;
-                memset(s, 0, sizeof(s));
-                sprintf(s, "T%d[%d]", id, pos * 4);
-                string str = s;
-                insert(&str, 0, 0, ' ');
-                pos++;
-            }
+        while(pos < plus){
+            char s[100];
+            memset(s, 0, sizeof(s));
+            sprintf(s, "T%d[%d] = %c%d\n", id, pos * 4, ' ', 0);
+            Context += s;
+            memset(s, 0, sizeof(s));
+            sprintf(s, "T%d[%d]", id, pos * 4);
+            string str = s;
+            insert(&str, 0, 0, ' ');
+            pos++;
         }
         pos = plus;
     }
