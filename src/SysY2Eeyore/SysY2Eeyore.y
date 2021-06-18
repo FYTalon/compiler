@@ -162,7 +162,7 @@ InitValArray: LBRACE InitValArrayInner RBRACE {
                 $$ = $2;
             }
             | LBRACE RBRACE{
-                $$ = new NArrayInitVal(true);
+                $$ = new NArrayInitVal(false);
             }
             ;
 
