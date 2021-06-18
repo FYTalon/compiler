@@ -123,12 +123,13 @@ public:
         string str = *name->name + "[]";
         Symbol *index = new Symbol(0, 0, ' ');
         tmplate = "";
+        bool flag = false;
         for(NExpression* exp : shape){
             Symbol *sz = lookup(&str);
             Symbol *tmp = exp->generate_ir();
             
             if(tmp->type == ' ' && index->type == ' '){
-                index->memloc += sz->paranum * tmp->memloc;
+                index->memloc = sz->paranum * index->memloc + tmp->memloc;
             }
             else {
                 if(id == -1){
@@ -140,11 +141,18 @@ public:
                     sprintf(s, "t%d = %d\n", id, index->memloc);
                     Context += s;
                 }
+                
+                if(flag){
+                    memset(s, 0, sizeof(s));
+                    sprintf(s, "t%d = t%d * %d\n", id, id, sz->paranum);
+                    Context += s;
+                }
                 memset(s, 0, sizeof(s));
-                sprintf(s, "t%d = %d\nt%d = t%d * %c%d\nt%d = t%d + t%d\n", id_, sz->paranum, id_, id_, tmp->type, tmp->memloc, id, id, id_);
+                sprintf(s, "t%d = t%d + %c%d\n", id, id, tmp->type, tmp->memloc);
                 Context += s;
             }
             str += "[]";
+            flag = true;
         }
         if(id == -1){
             memset(s, 0, sizeof(s));
@@ -237,14 +245,15 @@ public:
             len*= x;
             shape.push_back(x);
         }
-        for(int i = shape.size() - 2; ~i ; i--)
-            shape[i] *= shape[i + 1];
+        
         insert(name->name->name, 0, id = max_index[0]++, 'T');
-        string str = *name->name->name;
+        string str = *name->name->name + "[]";
         for(int i = 0; i < shape.size(); i++, str += "[]"){
             insert(&str, shape[i], id, 'T');
         }
-        insert(&str, 1, id, 'T');
+        for(int i = shape.size() - 2; ~i ; i--)
+            shape[i] *= shape[i + 1];
+        //insert(&str, 1, id, 'T');
         fprintf(Eeyore, "var %d T%d\n", len, id);
         int pos = 0;
         if(value != NULL) initial(value, shape, id, pos, 0);
