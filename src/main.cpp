@@ -7,7 +7,7 @@ FILE* RISCV;
 
 int main(int argc, char *argv[]){
     yyin = fopen(argv[3], "r");
-    Eeyore = fopen("m.eeyore", "w");
+    //Eeyore = fopen("m.eeyore", "w");
     Eeyore = fopen(argv[5], "w");
     yyparse();
     root->generate_ir();
@@ -18,7 +18,7 @@ int main(int argc, char *argv[]){
     zzparse();
     Troot->generate_ir();
     fclose(Tigger);
-    fclose(zzin);*/s
+    fclose(zzin);*/
 
     /*zzin = fopen(argv[3], "r");
     Tigger = fopen(argv[5], "w");
