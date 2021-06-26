@@ -66,6 +66,7 @@ public:
 class NExpression : public Node{
 public:
     virtual Symbol* generate_ir(){ return new Symbol(); }
+    virtual Symbol* generate(){ return generate_ir(); }
 };
 
 
@@ -101,6 +102,9 @@ public:
         return lookup(name);
     }
     virtual void update(){};
+    virtual Symbol* generate(){
+        return lookup(name);
+    }
 };
 
 class NArrayIdentifier : public NIdentifier{
@@ -179,6 +183,54 @@ public:
     }
     virtual void update(){
         Context += tmplate;
+    }
+    virtual Symbol* generate(){
+        Symbol* sym = lookup(name->name);
+        int id = -1;
+        char s[100];
+        string str = *name->name + "[]";
+        Symbol *index = new Symbol(0, 0, ' ');
+        bool flag = false;
+        for(int i = 0; ; i++){
+            Symbol *sz = lookup(&str);
+            if(sz->type == 'Z') break;
+            Symbol *tmp = i < shape.size() ? shape[i]->generate_ir() : new Symbol(0, 0, ' ');
+            
+            if(tmp->type == ' ' && index->type == ' '){
+                index->memloc = sz->paranum * index->memloc + tmp->memloc;
+            }
+            else {
+                if(id == -1){
+                    id = max_index[1]++;
+                    fprintf(Eeyore, "var t%d\n", id);
+                    memset(s, 0, sizeof(s));
+                    sprintf(s, "t%d = %d\n", id, index->memloc);
+                    Context += s;
+                }
+                
+                if(flag){
+                    memset(s, 0, sizeof(s));
+                    sprintf(s, "t%d = t%d * %d\n", id, id, sz->paranum);
+                    Context += s;
+                }
+                memset(s, 0, sizeof(s));
+                sprintf(s, "t%d = t%d + %c%d\n", id, id, tmp->type, tmp->memloc);
+                Context += s;
+            }
+            str += "[]";
+            flag = true;
+        }
+        if(id == -1){
+            id = max_index[1]++;
+            fprintf(Eeyore, "var t%d\n", id);
+            memset(s, 0, sizeof(s));
+            sprintf(s, "t%d = %d\n", id, index->memloc);
+            Context += s;
+        }
+        memset(s, 0, sizeof(s));
+        sprintf(s, "t%d = t%d * 4\nt%d = %c%d + t%d\n", id, id, id, sym->type, sym->memloc, id);
+        Context += s;
+        return new Symbol(0, id, 't');
     }
 };
 
@@ -397,7 +449,7 @@ public:
     vector<NExpression*> list;
     virtual Symbol* generate_ir(){
         for(NExpression* it : list){
-            Symbol* tmp = it->generate_ir();
+            Symbol* tmp = it->generate();
             char s[100];
             memset(s, 0, sizeof(s));
             sprintf(s, "param %c%d\n", tmp->type, tmp->memloc);
